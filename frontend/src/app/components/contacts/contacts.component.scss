@@ -1,0 +1,33 @@
+@import './src/sass/variables';
+
+.header {
+  background-image: url('../../../assets/Header_bar.png');
+  height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 40px;
+  padding-right: 40px;
+
+  .dp {
+    width: 55px;
+    height: 55px;
+    border-radius: 60px;
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    color: white;
+    margin-left: 10px;
+
+    .name {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .email {
+      font-size: small;
+    }
+  }
+}

@@ -1,0 +1,58 @@
+@import './src/sass/variables';
+
+.main-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  .g-signin2 {
+    display: flex;
+    justify-content: center;
+  }
+
+  .login-container {
+    background: #FFFFFF;
+    box-shadow: 0px 4px 10px rgba(5, 62, 209, 0.19);
+    border-radius: 10px;
+    padding: 30px;
+    max-width: 700px;
+
+    .login-form {
+      width: 500px;
+
+      .input {
+        background: #FFFFFF;
+        border: 1px solid #0A45C2;
+        box-sizing: border-box;
+        border-radius: 4px;
+        font-family: Open Sans;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 18px;
+        letter-spacing: 0.08em;
+        display: block;
+        color: #B6B6B6 !important;
+        width: 100%;
+        padding: 8px;
+        padding-left: 20px;
+        margin-bottom: 20px;
+      }
+
+      .signin {
+        background: #0A45C2;
+        border-radius: 4px;
+        font-family: Poppins;
+        font-style: normal;
+        font-weight: 600;
+        font-size: 20px;
+        padding: 8px;
+        color: #FFFFFF!important;
+        margin-top: 20px;
+        letter-spacing: 0.08em;
+        width: 100%;
+      }
+    }
+  }
+}
+

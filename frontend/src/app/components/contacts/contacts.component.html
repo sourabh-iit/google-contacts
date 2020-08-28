@@ -1,0 +1,10 @@
+<div class="header">
+  <div class="d-flex align-items-center">
+    <img class="dp" [src]="me.googlePictureLink" [alt]="me.email">
+    <div class="info">
+      <div class="name">{{me.name}}</div>
+      <div class="email">{{me.email}}</div>
+    </div>
+  </div>
+  <img (click)="logout()" class="c-pointer" src="../../../assets/Logout.png" alt="logout">
+</div>

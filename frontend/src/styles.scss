@@ -1,0 +1,25 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* Importing Bootstrap SCSS file. */
+@import '~bootstrap/scss/bootstrap';
+$fa-font-path: "~font-awesome/fonts";
+@import '~font-awesome/scss/font-awesome';
+@import './sass/variables';
+
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  background: #EFF7F9;
+  background-image: url('./assets/Background.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.c-pointer {
+  cursor: pointer;
+}
