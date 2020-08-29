@@ -1,21 +1,10 @@
-# chat-application
-Real time chat application
+Google contacts
 
 link: https://realtime-messaging-app.herokuapp.com
 
-Tech stack used: Node.js, Express.js, Mongodb, Socket.io, Angular
+Tech stack used: Node.js, Express.js, Mongodb, Angular, ngx-scrollbar, jquery, bootstrap
 
-Features:
-1. JWT based authentication.
-2. One to one realtime chat.
-3. Mutiple one to one chat at same time
-4. Online indicator
-5. User typing indicator
-
-How to use:
-1. Clone repository and go to chat-application folder. Run npm install.
-2. Then, run node app.js
-
-ToDo:
-1. Group chat
-2. LFU implementation for next chat box
+How to run:
+1. install npm and node
+2. npm install
+3. node app.js

@@ -17,6 +17,7 @@ export class ContactsComponent implements OnDestroy, AfterViewInit {
   public contacts = [];
   public totalContacts = 0;
   public nextPageToken = null;
+  public busy = false;
   @ViewChild(NgScrollbar) scrollbarRef: NgScrollbar;
 
   constructor(
@@ -63,10 +64,12 @@ export class ContactsComponent implements OnDestroy, AfterViewInit {
   }
 
   loadContacts(token = null): void {
+    this.busy = true;
     this.googleService.loadContacts(token).subscribe((res) => {
       this.contacts = this.contacts.concat(res.contacts);
       this.totalContacts = res.totalItems;
       this.nextPageToken = res.nextPageToken;
+      this.busy = false
     });
   }
 }

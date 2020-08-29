@@ -16,9 +16,6 @@
       <div class="col">EMAIL</div>
       <div class="col">PHONE NUMBER</div>
     </div>
-    <div *ngIf="contacts.length == 0" class="d-flex justify-content-center mt-3">
-      <small><i class="fa fa-spin fa-spinner"></i> Loading. Please wait...</small>
-    </div>
     <ng-scrollbar class="my-scrollbar">
       <div class="contacts-container">
         <div class="row table-row" *ngFor="let contact of contacts">
@@ -39,5 +36,8 @@
         </div>
       </div>
     </ng-scrollbar>
+    <div *ngIf="busy" class="d-flex justify-content-center mt-3">
+      <small><i class="fa fa-spin fa-spinner"></i> Loading. Please wait...</small>
+    </div>
   </div>
 </div>
