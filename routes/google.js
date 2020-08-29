@@ -4,8 +4,8 @@ var router = express.Router()
 const assert = require('assert');
 const {google} = require('googleapis');
 
-const CLIENT_ID = "737715185635-6r9bbcbsa2d1hm4ok049iugrqjop6odb.apps.googleusercontent.com";
-const CLIENT_SECRET = "YaKv-28UErCFuEquC3-lXS1m";
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const redirectUri = "http://localhost:3000/google/callback";
 const url = process.env.MONGODB_URI || "mongodb://mongo:27017";
 

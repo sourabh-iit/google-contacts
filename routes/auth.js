@@ -3,7 +3,7 @@ const auth = require('../auth_util');
 const assert = require('assert');
 const {OAuth2Client} = require('google-auth-library');
 
-const CLIENT_ID = "737715185635-6r9bbcbsa2d1hm4ok049iugrqjop6odb.apps.googleusercontent.com";
+const CLIENT_ID = process.env.CLIENT_ID;
 const url = process.env.MONGODB_URI || "mongodb://mongo:27017";
 
 async function connect() {
@@ -15,7 +15,6 @@ const login = async function(req, res, next) {
   try {
     const idToken = req.body.idToken;
     const accessToken = req.body.accessToken;
-    console.log(req.body)
     assert(idToken && accessToken, "invalid token");
     const client = new OAuth2Client(CLIENT_ID)
     const ticket = await client.verifyIdToken({
@@ -26,7 +25,6 @@ const login = async function(req, res, next) {
     assert(payload.email, "Email is empty");
     assert(payload.email_verified, "Email is not verified");
     const db = await connect();
-    console.log(payload);
     await db.collection('users').updateOne({email: payload.email}, {
       $set: {
         email: payload.email,
