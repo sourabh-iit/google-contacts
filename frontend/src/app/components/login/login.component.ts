@@ -1,8 +1,7 @@
 import { Component, OnInit, AfterViewInit, NgZone } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
-
-declare const gapi: any;
+import { GoogleService } from 'src/app/services/googleService';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +16,8 @@ export class LoginComponent implements AfterViewInit {
   constructor(
     private userService: UserService,
     private router: Router,
-    private zone: NgZone
+    private zone: NgZone,
+    private googleService: GoogleService
   ) {
     if (userService.isLoggedIn()) {
       router.navigateByUrl('/');
@@ -38,12 +38,8 @@ export class LoginComponent implements AfterViewInit {
   }
 
   public googleInit(): void {
-    gapi.load('auth2', () => {
-      this.auth2 = gapi.auth2.init({
-        client_id: '737715185635-6r9bbcbsa2d1hm4ok049iugrqjop6odb.apps.googleusercontent.com',
-        scope: 'profile email https://www.googleapis.com/auth/contacts.readonly',
-        redirect_uri: 'http://localhost:3000/google/callback'
-      });
+    this.googleService.getAuth().then((auth2) => {
+      this.auth2 = auth2;
       this.attachSignIn(document.getElementById('googleBtn'));
     });
   }

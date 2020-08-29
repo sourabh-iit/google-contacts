@@ -18,8 +18,6 @@ app.get('/login', function(req, res) {
   res.sendFile(temp_path);
 });
 app.use('/api/v1/login', auth.login);
-// app.get('/api/v1/authurl', auth.getAuthUrl);
-// app.get('/google/callback', auth.googleCallback);
 app.get('/', function(req, res, next) {
   res.sendFile(temp_path);
 });
@@ -40,9 +38,8 @@ app.use(async function(req, res, next) {
 
 app.use('/api/v1/google', googleRouter);
 
-// catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  res.send("Not found", status=404)
+  res.status(404).send("Not found")
 });
 
 // error handler

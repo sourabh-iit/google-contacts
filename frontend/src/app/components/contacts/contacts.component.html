@@ -8,3 +8,36 @@
   </div>
   <img (click)="logout()" class="c-pointer" src="../../../assets/Logout.png" alt="logout">
 </div>
+<div class="body">
+  <div class="table-container">
+    <div class="heading">Contacts <small class="fw-500">( {{totalContacts}} )</small></div>
+    <div class="row table-heading">
+      <div class="col">NAME</div>
+      <div class="col">EMAIL</div>
+      <div class="col">PHONE NUMBER</div>
+    </div>
+    <div *ngIf="contacts.length == 0" class="d-flex justify-content-center mt-3">
+      <small><i class="fa fa-spin fa-spinner"></i> Loading. Please wait...</small>
+    </div>
+    <ng-scrollbar class="my-scrollbar">
+      <div class="contacts-container">
+        <div class="row table-row" *ngFor="let contact of contacts">
+          <div class="col">
+            <img class="cover-photo" [src]="contact.coverPhoto" alt="contact.name" *ngIf="contact.coverPhoto != ''">
+            <span class="name">{{contact.name}}</span>
+          </div>
+          <div class="col">
+            <span class="email" *ngIf="contact.email != ''">{{contact.email}}</span>
+            <span *ngIf="contact.email == ''">-</span>
+          </div>
+          <div class="col">
+            <span class="phone-number" *ngIf="contact.phoneNumber != ''">{{contact.phoneNumber}}</span>
+            <span *ngIf="contact.phoneNumber == ''">-</span>
+          </div>
+          <img class="delete" src="../../../assets/bin-2-alternate.png" alt="delete">
+          <img class="checkbox" src="../../../assets/Selection_box.png" alt="check">
+        </div>
+      </div>
+    </ng-scrollbar>
+  </div>
+</div>

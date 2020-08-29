@@ -1,21 +1,23 @@
-import { Component, OnDestroy, NgZone } from '@angular/core';
+import { Component, OnDestroy, NgZone, ViewChild, AfterViewInit } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { GoogleService } from 'src/app/services/googleService';
-
-declare const gapi: any;
+import { NgScrollbar } from 'ngx-scrollbar';
 
 @Component({
   selector: 'app-contacts',
   templateUrl: './contacts.component.html',
   styleUrls: ['./contacts.component.scss']
 })
-export class ContactsComponent implements OnDestroy {
+export class ContactsComponent implements OnDestroy, AfterViewInit {
 
   public me: any;
   private subs = new Subscription();
   public contacts = [];
+  public totalContacts = 0;
+  public nextPageToken = null;
+  @ViewChild(NgScrollbar) scrollbarRef: NgScrollbar;
 
   constructor(
     public userService: UserService,
@@ -24,7 +26,21 @@ export class ContactsComponent implements OnDestroy {
     private googleService: GoogleService
   ) {
     this.me = this.userService.user;
-    this.loadContacts();
+    if (googleService.isExpired()) {
+      this.logout();
+    } else {
+      this.loadContacts();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.subs.add(this.scrollbarRef.scrolled.subscribe(e => {
+      const pos = e.target.scrollTop + e.target.clientHeight;
+      const max = e.target.scrollHeight;
+      if (pos >= max) {
+        this.loadContacts(this.nextPageToken);
+      }
+    }));
   }
 
   ngOnDestroy(): void {
@@ -37,8 +53,7 @@ export class ContactsComponent implements OnDestroy {
   }
 
   logout(): void {
-    gapi.load('auth2', () => {
-      const auth2 = gapi.auth2.getAuthInstance();
+    this.googleService.getAuthInstance().then((auth2) => {
       if (auth2 != null) {
         auth2.signOut().then(this.logoutUser);
       } else {
@@ -47,10 +62,11 @@ export class ContactsComponent implements OnDestroy {
     });
   }
 
-  loadContacts(): void {
-    this.googleService.loadContacts().subscribe((res) => {
-      this.contacts = res.contacts;
-      console.log(this.contacts);
+  loadContacts(token = null): void {
+    this.googleService.loadContacts(token).subscribe((res) => {
+      this.contacts = this.contacts.concat(res.contacts);
+      this.totalContacts = res.totalItems;
+      this.nextPageToken = res.nextPageToken;
     });
   }
 }

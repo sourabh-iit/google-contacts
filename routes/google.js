@@ -14,6 +14,18 @@ async function connect() {
   return client.db('contacts');
 }
 
+function getPrimaryImage(images) {
+    if(!images) {
+        return null;
+    }
+    for(let image of images) {
+        if(image.metadata.primary) {
+            return image;
+        }
+    }
+    return null;
+}
+
 router.get('/contacts', async function(req, res) {
     try {
         const db = await connect();
@@ -25,29 +37,33 @@ router.get('/contacts', async function(req, res) {
             clientSecret: CLIENT_SECRET,
             redirectUri: redirectUri
         });
+        const pageToken = req.query.nextPageToken;
         auth.setCredentials({access_token: user.accessToken});
         const resp = await google.people({version: "v1", auth}).people.connections.list({
             resourceName: 'people/me',
-            personFields: 'names,emailAddresses,coverPhotos,phoneNumbers',
-            pageSize: 20
+            personFields: 'names,emailAddresses,phoneNumbers,photos',
+            pageSize: 20,
+            pageToken: pageToken
         });
-        console.log(resp);
+        const totalItems = resp.data.totalPeople;
+        const nextPageToken = resp.data.nextPageToken;
         const connections = resp.data.connections;
         const contacts = [];
         if(connections) {
             connections.forEach((person) => {
+                const coverPhoto = getPrimaryImage(person.photos);
                 contacts.push({
                     name: person.names ? person.names[0].displayName: "",
                     email: person.emailAddresses ? person.emailAddresses[0].value : "",
-                    coverPhoto: person.coverPhotos ? person.coverPhotos[0].url : "",
-                    phoneNumber: person.phoneNumbers[0].value
+                    coverPhoto: coverPhoto ? coverPhoto.url : "",
+                    phoneNumber: person.phoneNumbers ? person.phoneNumbers[0].value : ""
                 });
             });
         }
-        res.json({contacts: contacts});
+        res.json({contacts: contacts, totalItems: totalItems, nextPageToken: nextPageToken});
     } catch(error) {
         res.status(400).json({success: false, error: error.message});
     }
-})
+});
 
 module.exports = router

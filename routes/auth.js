@@ -4,8 +4,6 @@ const assert = require('assert');
 const {OAuth2Client} = require('google-auth-library');
 
 const CLIENT_ID = "737715185635-6r9bbcbsa2d1hm4ok049iugrqjop6odb.apps.googleusercontent.com";
-const CLIENT_SECRET = "YaKv-28UErCFuEquC3-lXS1m";
-const redirectUri = "http://localhost:3000/google/callback";
 const url = process.env.MONGODB_URI || "mongodb://localhost:27017";
 
 async function connect() {
@@ -46,53 +44,4 @@ const login = async function(req, res, next) {
   }
 }
 
-// const getAuthUrl = async function(req, res, next) {
-//   const oauth2Client = new google.auth.OAuth2(
-//     CLIENT_ID, CLIENT_SECRET, redirectUri
-//   );
-//   const authUrl = oauth2Client.generateAuthUrl({
-//     access_type: 'offline',
-//     scope: "profile email https://www.googleapis.com/auth/contacts.readonly"
-//   })
-//   res.json({url: authUrl});
-// }
-
-// const googleCallback = async function(req, res, next) {
-//   try {
-//     const code = req.query.code;
-//     const oauth2Client = new google.auth.OAuth2(
-//       CLIENT_ID, CLIENT_SECRET, redirectUri
-//     );
-//     const resp = await oauth2Client.getToken(code);
-//     const tokens = resp.tokens;
-//     const accessToken = tokens.access_token
-//     const refreshToken = tokens.refresh_token;
-//     const expiry = tokens.expiry_date;
-//     oauth2Client.setCredentials(tokens);
-//     const peopleService = google.people({version: 'v1', auth: oauth2Client}).people
-//     const val = await peopleService.get({resourceName: 'people/me', personFields: "names,emailAddresses,coverPhotos"});
-//     const data = val.data;
-//     const name = data.names[0].displayName;
-//     const email = data.emailAddresses[0].value;
-//     const coverPhoto = data.coverPhotos[0].url;
-//     const db = await connect();
-//     await db.collection('users').updateOne({email: email}, {
-//       $set: {
-//         name: name || "",
-//         accessToken: accessToken,
-//         refreshToken: refreshToken,
-//         expiry: expiry,
-//         coverPhoto: coverPhoto || ""
-//       }
-//     }, {upsert: true});
-//     const user = await db.collection('users').findOne({email: email});
-//     res.json(user);
-//   } catch(e) {
-//     console.log(e);
-//     res.status(400).send(e);
-//   }
-// }
-
 module.exports.login = login;
-// module.exports.getAuthUrl = getAuthUrl;
-// module.exports.googleCallback = googleCallback;

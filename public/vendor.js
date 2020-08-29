@@ -1,5 +1,1311 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([["vendor"],{
 
+/***/ "./node_modules/@angular/cdk/__ivy_ngcc__/fesm2015/bidi.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/@angular/cdk/__ivy_ngcc__/fesm2015/bidi.js ***!
+  \*****************************************************************/
+/*! exports provided: BidiModule, DIR_DOCUMENT, Dir, Directionality, ɵangular_material_src_cdk_bidi_bidi_a */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BidiModule", function() { return BidiModule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DIR_DOCUMENT", function() { return DIR_DOCUMENT; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Dir", function() { return Dir; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Directionality", function() { return Directionality; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_material_src_cdk_bidi_bidi_a", function() { return DIR_DOCUMENT_FACTORY; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/__ivy_ngcc__/fesm2015/core.js");
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common */ "./node_modules/@angular/common/__ivy_ngcc__/fesm2015/common.js");
+
+
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Injection token used to inject the document into Directionality.
+ * This is used so that the value can be faked in tests.
+ *
+ * We can't use the real document in tests because changing the real `dir` causes geometry-based
+ * tests in Safari to fail.
+ *
+ * We also can't re-provide the DOCUMENT token from platform-brower because the unit tests
+ * themselves use things like `querySelector` in test code.
+ *
+ * This token is defined in a separate file from Directionality as a workaround for
+ * https://github.com/angular/angular/issues/22559
+ *
+ * @docs-private
+ */
+
+const DIR_DOCUMENT = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["InjectionToken"]('cdk-dir-doc', {
+    providedIn: 'root',
+    factory: DIR_DOCUMENT_FACTORY,
+});
+/** @docs-private */
+function DIR_DOCUMENT_FACTORY() {
+    return Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["inject"])(_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]);
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * The directionality (LTR / RTL) context for the application (or a subtree of it).
+ * Exposes the current direction and a stream of direction changes.
+ */
+class Directionality {
+    constructor(_document) {
+        /** The current 'ltr' or 'rtl' value. */
+        this.value = 'ltr';
+        /** Stream that emits whenever the 'ltr' / 'rtl' state changes. */
+        this.change = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        if (_document) {
+            // TODO: handle 'auto' value -
+            // We still need to account for dir="auto".
+            // It looks like HTMLElemenet.dir is also "auto" when that's set to the attribute,
+            // but getComputedStyle return either "ltr" or "rtl". avoiding getComputedStyle for now
+            const bodyDir = _document.body ? _document.body.dir : null;
+            const htmlDir = _document.documentElement ? _document.documentElement.dir : null;
+            const value = bodyDir || htmlDir;
+            this.value = (value === 'ltr' || value === 'rtl') ? value : 'ltr';
+        }
+    }
+    ngOnDestroy() {
+        this.change.complete();
+    }
+}
+Directionality.ɵfac = function Directionality_Factory(t) { return new (t || Directionality)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](DIR_DOCUMENT, 8)); };
+Directionality.ɵprov = Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"])({ factory: function Directionality_Factory() { return new Directionality(Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"])(DIR_DOCUMENT, 8)); }, token: Directionality, providedIn: "root" });
+Directionality.ctorParameters = () => [
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [DIR_DOCUMENT,] }] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](Directionality, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"],
+        args: [{ providedIn: 'root' }]
+    }], function () { return [{ type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [DIR_DOCUMENT]
+            }] }]; }, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Directive to listen for changes of direction of part of the DOM.
+ *
+ * Provides itself as Directionality such that descendant directives only need to ever inject
+ * Directionality to get the closest direction.
+ */
+class Dir {
+    constructor() {
+        /** Normalized direction that accounts for invalid/unsupported values. */
+        this._dir = 'ltr';
+        /** Whether the `value` has been set to its initial value. */
+        this._isInitialized = false;
+        /** Event emitted when the direction changes. */
+        this.change = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+    }
+    /** @docs-private */
+    get dir() { return this._dir; }
+    set dir(value) {
+        const old = this._dir;
+        const normalizedValue = value ? value.toLowerCase() : value;
+        this._rawDir = value;
+        this._dir = (normalizedValue === 'ltr' || normalizedValue === 'rtl') ? normalizedValue : 'ltr';
+        if (old !== this._dir && this._isInitialized) {
+            this.change.emit(this._dir);
+        }
+    }
+    /** Current layout direction of the element. */
+    get value() { return this.dir; }
+    /** Initialize once default value has been set. */
+    ngAfterContentInit() {
+        this._isInitialized = true;
+    }
+    ngOnDestroy() {
+        this.change.complete();
+    }
+}
+Dir.ɵfac = function Dir_Factory(t) { return new (t || Dir)(); };
+Dir.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: Dir, selectors: [["", "dir", ""]], hostVars: 1, hostBindings: function Dir_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵattribute"]("dir", ctx._rawDir);
+    } }, inputs: { dir: "dir" }, outputs: { change: "dirChange" }, exportAs: ["dir"], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([{ provide: Directionality, useExisting: Dir }])] });
+Dir.propDecorators = {
+    change: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['dirChange',] }],
+    dir: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }]
+};
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](Dir, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[dir]',
+                providers: [{ provide: Directionality, useExisting: Dir }],
+                host: { '[attr.dir]': '_rawDir' },
+                exportAs: 'dir'
+            }]
+    }], function () { return []; }, { change: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['dirChange']
+        }], dir: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+class BidiModule {
+}
+BidiModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: BidiModule });
+BidiModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ factory: function BidiModule_Factory(t) { return new (t || BidiModule)(); } });
+(function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](BidiModule, { declarations: [Dir], exports: [Dir] }); })();
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](BidiModule, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
+        args: [{
+                exports: [Dir],
+                declarations: [Dir]
+            }]
+    }], null, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * Generated bundle index. Do not edit.
+ */
+
+
+
+//# sourceMappingURL=bidi.js.map
+
+/***/ }),
+
+/***/ "./node_modules/@angular/cdk/__ivy_ngcc__/fesm2015/platform.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/@angular/cdk/__ivy_ngcc__/fesm2015/platform.js ***!
+  \*********************************************************************/
+/*! exports provided: Platform, PlatformModule, _getShadowRoot, _supportsShadowDom, getRtlScrollAxisType, getSupportedInputTypes, normalizePassiveListenerOptions, supportsPassiveEventListeners, supportsScrollBehavior */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Platform", function() { return Platform; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PlatformModule", function() { return PlatformModule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "_getShadowRoot", function() { return _getShadowRoot; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "_supportsShadowDom", function() { return _supportsShadowDom; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getRtlScrollAxisType", function() { return getRtlScrollAxisType; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSupportedInputTypes", function() { return getSupportedInputTypes; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "normalizePassiveListenerOptions", function() { return normalizePassiveListenerOptions; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "supportsPassiveEventListeners", function() { return supportsPassiveEventListeners; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "supportsScrollBehavior", function() { return supportsScrollBehavior; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/__ivy_ngcc__/fesm2015/core.js");
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common */ "./node_modules/@angular/common/__ivy_ngcc__/fesm2015/common.js");
+
+
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// Whether the current platform supports the V8 Break Iterator. The V8 check
+// is necessary to detect all Blink based browsers.
+
+let hasV8BreakIterator;
+// We need a try/catch around the reference to `Intl`, because accessing it in some cases can
+// cause IE to throw. These cases are tied to particular versions of Windows and can happen if
+// the consumer is providing a polyfilled `Map`. See:
+// https://github.com/Microsoft/ChakraCore/issues/3189
+// https://github.com/angular/components/issues/15687
+try {
+    hasV8BreakIterator = (typeof Intl !== 'undefined' && Intl.v8BreakIterator);
+}
+catch (_a) {
+    hasV8BreakIterator = false;
+}
+/**
+ * Service to detect the current platform by comparing the userAgent strings and
+ * checking browser-specific global properties.
+ */
+class Platform {
+    constructor(_platformId) {
+        this._platformId = _platformId;
+        // We want to use the Angular platform check because if the Document is shimmed
+        // without the navigator, the following checks will fail. This is preferred because
+        // sometimes the Document may be shimmed without the user's knowledge or intention
+        /** Whether the Angular application is being rendered in the browser. */
+        this.isBrowser = this._platformId ?
+            Object(_angular_common__WEBPACK_IMPORTED_MODULE_1__["isPlatformBrowser"])(this._platformId) : typeof document === 'object' && !!document;
+        /** Whether the current browser is Microsoft Edge. */
+        this.EDGE = this.isBrowser && /(edge)/i.test(navigator.userAgent);
+        /** Whether the current rendering engine is Microsoft Trident. */
+        this.TRIDENT = this.isBrowser && /(msie|trident)/i.test(navigator.userAgent);
+        // EdgeHTML and Trident mock Blink specific things and need to be excluded from this check.
+        /** Whether the current rendering engine is Blink. */
+        this.BLINK = this.isBrowser && (!!(window.chrome || hasV8BreakIterator) &&
+            typeof CSS !== 'undefined' && !this.EDGE && !this.TRIDENT);
+        // Webkit is part of the userAgent in EdgeHTML, Blink and Trident. Therefore we need to
+        // ensure that Webkit runs standalone and is not used as another engine's base.
+        /** Whether the current rendering engine is WebKit. */
+        this.WEBKIT = this.isBrowser &&
+            /AppleWebKit/i.test(navigator.userAgent) && !this.BLINK && !this.EDGE && !this.TRIDENT;
+        /** Whether the current platform is Apple iOS. */
+        this.IOS = this.isBrowser && /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+            !('MSStream' in window);
+        // It's difficult to detect the plain Gecko engine, because most of the browsers identify
+        // them self as Gecko-like browsers and modify the userAgent's according to that.
+        // Since we only cover one explicit Firefox case, we can simply check for Firefox
+        // instead of having an unstable check for Gecko.
+        /** Whether the current browser is Firefox. */
+        this.FIREFOX = this.isBrowser && /(firefox|minefield)/i.test(navigator.userAgent);
+        /** Whether the current platform is Android. */
+        // Trident on mobile adds the android platform to the userAgent to trick detections.
+        this.ANDROID = this.isBrowser && /android/i.test(navigator.userAgent) && !this.TRIDENT;
+        // Safari browsers will include the Safari keyword in their userAgent. Some browsers may fake
+        // this and just place the Safari keyword in the userAgent. To be more safe about Safari every
+        // Safari browser should also use Webkit as its layout engine.
+        /** Whether the current browser is Safari. */
+        this.SAFARI = this.isBrowser && /safari/i.test(navigator.userAgent) && this.WEBKIT;
+    }
+}
+Platform.ɵfac = function Platform_Factory(t) { return new (t || Platform)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["PLATFORM_ID"])); };
+Platform.ɵprov = Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"])({ factory: function Platform_Factory() { return new Platform(Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"])(_angular_core__WEBPACK_IMPORTED_MODULE_0__["PLATFORM_ID"])); }, token: Platform, providedIn: "root" });
+Platform.ctorParameters = () => [
+    { type: Object, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["PLATFORM_ID"],] }] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](Platform, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"],
+        args: [{ providedIn: 'root' }]
+    }], function () { return [{ type: Object, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["PLATFORM_ID"]]
+            }] }]; }, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+class PlatformModule {
+}
+PlatformModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: PlatformModule });
+PlatformModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ factory: function PlatformModule_Factory(t) { return new (t || PlatformModule)(); } });
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](PlatformModule, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
+        args: [{}]
+    }], null, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** Cached result Set of input types support by the current browser. */
+let supportedInputTypes;
+/** Types of `<input>` that *might* be supported. */
+const candidateInputTypes = [
+    // `color` must come first. Chrome 56 shows a warning if we change the type to `color` after
+    // first changing it to something else:
+    // The specified value "" does not conform to the required format.
+    // The format is "#rrggbb" where rr, gg, bb are two-digit hexadecimal numbers.
+    'color',
+    'button',
+    'checkbox',
+    'date',
+    'datetime-local',
+    'email',
+    'file',
+    'hidden',
+    'image',
+    'month',
+    'number',
+    'password',
+    'radio',
+    'range',
+    'reset',
+    'search',
+    'submit',
+    'tel',
+    'text',
+    'time',
+    'url',
+    'week',
+];
+/** @returns The input types supported by this browser. */
+function getSupportedInputTypes() {
+    // Result is cached.
+    if (supportedInputTypes) {
+        return supportedInputTypes;
+    }
+    // We can't check if an input type is not supported until we're on the browser, so say that
+    // everything is supported when not on the browser. We don't use `Platform` here since it's
+    // just a helper function and can't inject it.
+    if (typeof document !== 'object' || !document) {
+        supportedInputTypes = new Set(candidateInputTypes);
+        return supportedInputTypes;
+    }
+    let featureTestInput = document.createElement('input');
+    supportedInputTypes = new Set(candidateInputTypes.filter(value => {
+        featureTestInput.setAttribute('type', value);
+        return featureTestInput.type === value;
+    }));
+    return supportedInputTypes;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** Cached result of whether the user's browser supports passive event listeners. */
+let supportsPassiveEvents;
+/**
+ * Checks whether the user's browser supports passive event listeners.
+ * See: https://github.com/WICG/EventListenerOptions/blob/gh-pages/explainer.md
+ */
+function supportsPassiveEventListeners() {
+    if (supportsPassiveEvents == null && typeof window !== 'undefined') {
+        try {
+            window.addEventListener('test', null, Object.defineProperty({}, 'passive', {
+                get: () => supportsPassiveEvents = true
+            }));
+        }
+        finally {
+            supportsPassiveEvents = supportsPassiveEvents || false;
+        }
+    }
+    return supportsPassiveEvents;
+}
+/**
+ * Normalizes an `AddEventListener` object to something that can be passed
+ * to `addEventListener` on any browser, no matter whether it supports the
+ * `options` parameter.
+ * @param options Object to be normalized.
+ */
+function normalizePassiveListenerOptions(options) {
+    return supportsPassiveEventListeners() ? options : !!options.capture;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** Cached result of the way the browser handles the horizontal scroll axis in RTL mode. */
+let rtlScrollAxisType;
+/** Check whether the browser supports scroll behaviors. */
+function supportsScrollBehavior() {
+    return !!(typeof document == 'object' && 'scrollBehavior' in document.documentElement.style);
+}
+/**
+ * Checks the type of RTL scroll axis used by this browser. As of time of writing, Chrome is NORMAL,
+ * Firefox & Safari are NEGATED, and IE & Edge are INVERTED.
+ */
+function getRtlScrollAxisType() {
+    // We can't check unless we're on the browser. Just assume 'normal' if we're not.
+    if (typeof document !== 'object' || !document) {
+        return 0 /* NORMAL */;
+    }
+    if (rtlScrollAxisType == null) {
+        // Create a 1px wide scrolling container and a 2px wide content element.
+        const scrollContainer = document.createElement('div');
+        const containerStyle = scrollContainer.style;
+        scrollContainer.dir = 'rtl';
+        containerStyle.width = '1px';
+        containerStyle.overflow = 'auto';
+        containerStyle.visibility = 'hidden';
+        containerStyle.pointerEvents = 'none';
+        containerStyle.position = 'absolute';
+        const content = document.createElement('div');
+        const contentStyle = content.style;
+        contentStyle.width = '2px';
+        contentStyle.height = '1px';
+        scrollContainer.appendChild(content);
+        document.body.appendChild(scrollContainer);
+        rtlScrollAxisType = 0 /* NORMAL */;
+        // The viewport starts scrolled all the way to the right in RTL mode. If we are in a NORMAL
+        // browser this would mean that the scrollLeft should be 1. If it's zero instead we know we're
+        // dealing with one of the other two types of browsers.
+        if (scrollContainer.scrollLeft === 0) {
+            // In a NEGATED browser the scrollLeft is always somewhere in [-maxScrollAmount, 0]. For an
+            // INVERTED browser it is always somewhere in [0, maxScrollAmount]. We can determine which by
+            // setting to the scrollLeft to 1. This is past the max for a NEGATED browser, so it will
+            // return 0 when we read it again.
+            scrollContainer.scrollLeft = 1;
+            rtlScrollAxisType =
+                scrollContainer.scrollLeft === 0 ? 1 /* NEGATED */ : 2 /* INVERTED */;
+        }
+        scrollContainer.parentNode.removeChild(scrollContainer);
+    }
+    return rtlScrollAxisType;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+let shadowDomIsSupported;
+/** Checks whether the user's browser support Shadow DOM. */
+function _supportsShadowDom() {
+    if (shadowDomIsSupported == null) {
+        const head = typeof document !== 'undefined' ? document.head : null;
+        shadowDomIsSupported = !!(head && (head.createShadowRoot || head.attachShadow));
+    }
+    return shadowDomIsSupported;
+}
+/** Gets the shadow root of an element, if supported and the element is inside the Shadow DOM. */
+function _getShadowRoot(element) {
+    if (_supportsShadowDom()) {
+        const rootNode = element.getRootNode ? element.getRootNode() : null;
+        // Note that this should be caught by `_supportsShadowDom`, but some
+        // teams have been able to hit this code path on unsupported browsers.
+        if (typeof ShadowRoot !== 'undefined' && ShadowRoot && rootNode instanceof ShadowRoot) {
+            return rootNode;
+        }
+    }
+    return null;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * Generated bundle index. Do not edit.
+ */
+
+
+
+//# sourceMappingURL=platform.js.map
+
+/***/ }),
+
+/***/ "./node_modules/@angular/cdk/__ivy_ngcc__/fesm2015/portal.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/@angular/cdk/__ivy_ngcc__/fesm2015/portal.js ***!
+  \*******************************************************************/
+/*! exports provided: BasePortalHost, BasePortalOutlet, CdkPortal, CdkPortalOutlet, ComponentPortal, DomPortal, DomPortalHost, DomPortalOutlet, Portal, PortalHostDirective, PortalInjector, PortalModule, TemplatePortal, TemplatePortalDirective */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BasePortalHost", function() { return BasePortalHost; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BasePortalOutlet", function() { return BasePortalOutlet; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CdkPortal", function() { return CdkPortal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CdkPortalOutlet", function() { return CdkPortalOutlet; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ComponentPortal", function() { return ComponentPortal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DomPortal", function() { return DomPortal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DomPortalHost", function() { return DomPortalHost; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DomPortalOutlet", function() { return DomPortalOutlet; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Portal", function() { return Portal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PortalHostDirective", function() { return PortalHostDirective; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PortalInjector", function() { return PortalInjector; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PortalModule", function() { return PortalModule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TemplatePortal", function() { return TemplatePortal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TemplatePortalDirective", function() { return TemplatePortalDirective; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/__ivy_ngcc__/fesm2015/core.js");
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common */ "./node_modules/@angular/common/__ivy_ngcc__/fesm2015/common.js");
+
+
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Throws an exception when attempting to attach a null portal to a host.
+ * @docs-private
+ */
+
+function throwNullPortalError() {
+    throw Error('Must provide a portal to attach');
+}
+/**
+ * Throws an exception when attempting to attach a portal to a host that is already attached.
+ * @docs-private
+ */
+function throwPortalAlreadyAttachedError() {
+    throw Error('Host already has a portal attached');
+}
+/**
+ * Throws an exception when attempting to attach a portal to an already-disposed host.
+ * @docs-private
+ */
+function throwPortalOutletAlreadyDisposedError() {
+    throw Error('This PortalOutlet has already been disposed');
+}
+/**
+ * Throws an exception when attempting to attach an unknown portal type.
+ * @docs-private
+ */
+function throwUnknownPortalTypeError() {
+    throw Error('Attempting to attach an unknown Portal type. BasePortalOutlet accepts either ' +
+        'a ComponentPortal or a TemplatePortal.');
+}
+/**
+ * Throws an exception when attempting to attach a portal to a null host.
+ * @docs-private
+ */
+function throwNullPortalOutletError() {
+    throw Error('Attempting to attach a portal to a null PortalOutlet');
+}
+/**
+ * Throws an exception when attempting to detach a portal that is not attached.
+ * @docs-private
+ */
+function throwNoPortalAttachedError() {
+    throw Error('Attempting to detach a portal that is not attached to a host');
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A `Portal` is something that you want to render somewhere else.
+ * It can be attach to / detached from a `PortalOutlet`.
+ */
+class Portal {
+    /** Attach this portal to a host. */
+    attach(host) {
+        if (host == null) {
+            throwNullPortalOutletError();
+        }
+        if (host.hasAttached()) {
+            throwPortalAlreadyAttachedError();
+        }
+        this._attachedHost = host;
+        return host.attach(this);
+    }
+    /** Detach this portal from its host */
+    detach() {
+        let host = this._attachedHost;
+        if (host == null) {
+            throwNoPortalAttachedError();
+        }
+        else {
+            this._attachedHost = null;
+            host.detach();
+        }
+    }
+    /** Whether this portal is attached to a host. */
+    get isAttached() {
+        return this._attachedHost != null;
+    }
+    /**
+     * Sets the PortalOutlet reference without performing `attach()`. This is used directly by
+     * the PortalOutlet when it is performing an `attach()` or `detach()`.
+     */
+    setAttachedHost(host) {
+        this._attachedHost = host;
+    }
+}
+/**
+ * A `ComponentPortal` is a portal that instantiates some Component upon attachment.
+ */
+class ComponentPortal extends Portal {
+    constructor(component, viewContainerRef, injector, componentFactoryResolver) {
+        super();
+        this.component = component;
+        this.viewContainerRef = viewContainerRef;
+        this.injector = injector;
+        this.componentFactoryResolver = componentFactoryResolver;
+    }
+}
+/**
+ * A `TemplatePortal` is a portal that represents some embedded template (TemplateRef).
+ */
+class TemplatePortal extends Portal {
+    constructor(template, viewContainerRef, context) {
+        super();
+        this.templateRef = template;
+        this.viewContainerRef = viewContainerRef;
+        this.context = context;
+    }
+    get origin() {
+        return this.templateRef.elementRef;
+    }
+    /**
+     * Attach the portal to the provided `PortalOutlet`.
+     * When a context is provided it will override the `context` property of the `TemplatePortal`
+     * instance.
+     */
+    attach(host, context = this.context) {
+        this.context = context;
+        return super.attach(host);
+    }
+    detach() {
+        this.context = undefined;
+        return super.detach();
+    }
+}
+/**
+ * A `DomPortal` is a portal whose DOM element will be taken from its current position
+ * in the DOM and moved into a portal outlet, when it is attached. On detach, the content
+ * will be restored to its original position.
+ */
+class DomPortal extends Portal {
+    constructor(element) {
+        super();
+        this.element = element instanceof _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] ? element.nativeElement : element;
+    }
+}
+/**
+ * Partial implementation of PortalOutlet that handles attaching
+ * ComponentPortal and TemplatePortal.
+ */
+class BasePortalOutlet {
+    constructor() {
+        /** Whether this host has already been permanently disposed. */
+        this._isDisposed = false;
+        // @breaking-change 10.0.0 `attachDomPortal` to become a required abstract method.
+        this.attachDomPortal = null;
+    }
+    /** Whether this host has an attached portal. */
+    hasAttached() {
+        return !!this._attachedPortal;
+    }
+    /** Attaches a portal. */
+    attach(portal) {
+        if (!portal) {
+            throwNullPortalError();
+        }
+        if (this.hasAttached()) {
+            throwPortalAlreadyAttachedError();
+        }
+        if (this._isDisposed) {
+            throwPortalOutletAlreadyDisposedError();
+        }
+        if (portal instanceof ComponentPortal) {
+            this._attachedPortal = portal;
+            return this.attachComponentPortal(portal);
+        }
+        else if (portal instanceof TemplatePortal) {
+            this._attachedPortal = portal;
+            return this.attachTemplatePortal(portal);
+            // @breaking-change 10.0.0 remove null check for `this.attachDomPortal`.
+        }
+        else if (this.attachDomPortal && portal instanceof DomPortal) {
+            this._attachedPortal = portal;
+            return this.attachDomPortal(portal);
+        }
+        throwUnknownPortalTypeError();
+    }
+    /** Detaches a previously attached portal. */
+    detach() {
+        if (this._attachedPortal) {
+            this._attachedPortal.setAttachedHost(null);
+            this._attachedPortal = null;
+        }
+        this._invokeDisposeFn();
+    }
+    /** Permanently dispose of this portal host. */
+    dispose() {
+        if (this.hasAttached()) {
+            this.detach();
+        }
+        this._invokeDisposeFn();
+        this._isDisposed = true;
+    }
+    /** @docs-private */
+    setDisposeFn(fn) {
+        this._disposeFn = fn;
+    }
+    _invokeDisposeFn() {
+        if (this._disposeFn) {
+            this._disposeFn();
+            this._disposeFn = null;
+        }
+    }
+}
+/**
+ * @deprecated Use `BasePortalOutlet` instead.
+ * @breaking-change 9.0.0
+ */
+class BasePortalHost extends BasePortalOutlet {
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A PortalOutlet for attaching portals to an arbitrary DOM element outside of the Angular
+ * application context.
+ */
+class DomPortalOutlet extends BasePortalOutlet {
+    constructor(
+    /** Element into which the content is projected. */
+    outletElement, _componentFactoryResolver, _appRef, _defaultInjector, 
+    /**
+     * @deprecated `_document` Parameter to be made required.
+     * @breaking-change 10.0.0
+     */
+    _document) {
+        super();
+        this.outletElement = outletElement;
+        this._componentFactoryResolver = _componentFactoryResolver;
+        this._appRef = _appRef;
+        this._defaultInjector = _defaultInjector;
+        /**
+         * Attaches a DOM portal by transferring its content into the outlet.
+         * @param portal Portal to be attached.
+         * @deprecated To be turned into a method.
+         * @breaking-change 10.0.0
+         */
+        this.attachDomPortal = (portal) => {
+            // @breaking-change 10.0.0 Remove check and error once the
+            // `_document` constructor parameter is required.
+            if (!this._document) {
+                throw Error('Cannot attach DOM portal without _document constructor parameter');
+            }
+            const element = portal.element;
+            if (!element.parentNode) {
+                throw Error('DOM portal content must be attached to a parent node.');
+            }
+            // Anchor used to save the element's previous position so
+            // that we can restore it when the portal is detached.
+            const anchorNode = this._document.createComment('dom-portal');
+            element.parentNode.insertBefore(anchorNode, element);
+            this.outletElement.appendChild(element);
+            super.setDisposeFn(() => {
+                // We can't use `replaceWith` here because IE doesn't support it.
+                if (anchorNode.parentNode) {
+                    anchorNode.parentNode.replaceChild(element, anchorNode);
+                }
+            });
+        };
+        this._document = _document;
+    }
+    /**
+     * Attach the given ComponentPortal to DOM element using the ComponentFactoryResolver.
+     * @param portal Portal to be attached
+     * @returns Reference to the created component.
+     */
+    attachComponentPortal(portal) {
+        const resolver = portal.componentFactoryResolver || this._componentFactoryResolver;
+        const componentFactory = resolver.resolveComponentFactory(portal.component);
+        let componentRef;
+        // If the portal specifies a ViewContainerRef, we will use that as the attachment point
+        // for the component (in terms of Angular's component tree, not rendering).
+        // When the ViewContainerRef is missing, we use the factory to create the component directly
+        // and then manually attach the view to the application.
+        if (portal.viewContainerRef) {
+            componentRef = portal.viewContainerRef.createComponent(componentFactory, portal.viewContainerRef.length, portal.injector || portal.viewContainerRef.injector);
+            this.setDisposeFn(() => componentRef.destroy());
+        }
+        else {
+            componentRef = componentFactory.create(portal.injector || this._defaultInjector);
+            this._appRef.attachView(componentRef.hostView);
+            this.setDisposeFn(() => {
+                this._appRef.detachView(componentRef.hostView);
+                componentRef.destroy();
+            });
+        }
+        // At this point the component has been instantiated, so we move it to the location in the DOM
+        // where we want it to be rendered.
+        this.outletElement.appendChild(this._getComponentRootNode(componentRef));
+        return componentRef;
+    }
+    /**
+     * Attaches a template portal to the DOM as an embedded view.
+     * @param portal Portal to be attached.
+     * @returns Reference to the created embedded view.
+     */
+    attachTemplatePortal(portal) {
+        let viewContainer = portal.viewContainerRef;
+        let viewRef = viewContainer.createEmbeddedView(portal.templateRef, portal.context);
+        // The method `createEmbeddedView` will add the view as a child of the viewContainer.
+        // But for the DomPortalOutlet the view can be added everywhere in the DOM
+        // (e.g Overlay Container) To move the view to the specified host element. We just
+        // re-append the existing root nodes.
+        viewRef.rootNodes.forEach(rootNode => this.outletElement.appendChild(rootNode));
+        // Note that we want to detect changes after the nodes have been moved so that
+        // any directives inside the portal that are looking at the DOM inside a lifecycle
+        // hook won't be invoked too early.
+        viewRef.detectChanges();
+        this.setDisposeFn((() => {
+            let index = viewContainer.indexOf(viewRef);
+            if (index !== -1) {
+                viewContainer.remove(index);
+            }
+        }));
+        // TODO(jelbourn): Return locals from view.
+        return viewRef;
+    }
+    /**
+     * Clears out a portal from the DOM.
+     */
+    dispose() {
+        super.dispose();
+        if (this.outletElement.parentNode != null) {
+            this.outletElement.parentNode.removeChild(this.outletElement);
+        }
+    }
+    /** Gets the root HTMLElement for an instantiated component. */
+    _getComponentRootNode(componentRef) {
+        return componentRef.hostView.rootNodes[0];
+    }
+}
+/**
+ * @deprecated Use `DomPortalOutlet` instead.
+ * @breaking-change 9.0.0
+ */
+class DomPortalHost extends DomPortalOutlet {
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Directive version of a `TemplatePortal`. Because the directive *is* a TemplatePortal,
+ * the directive instance itself can be attached to a host, enabling declarative use of portals.
+ */
+class CdkPortal extends TemplatePortal {
+    constructor(templateRef, viewContainerRef) {
+        super(templateRef, viewContainerRef);
+    }
+}
+CdkPortal.ɵfac = function CdkPortal_Factory(t) { return new (t || CdkPortal)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["TemplateRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewContainerRef"])); };
+CdkPortal.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: CdkPortal, selectors: [["", "cdkPortal", ""]], exportAs: ["cdkPortal"], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+CdkPortal.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["TemplateRef"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewContainerRef"] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](CdkPortal, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[cdkPortal]',
+                exportAs: 'cdkPortal'
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["TemplateRef"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewContainerRef"] }]; }, null); })();
+/**
+ * @deprecated Use `CdkPortal` instead.
+ * @breaking-change 9.0.0
+ */
+class TemplatePortalDirective extends CdkPortal {
+}
+TemplatePortalDirective.ɵfac = function TemplatePortalDirective_Factory(t) { return ɵTemplatePortalDirective_BaseFactory(t || TemplatePortalDirective); };
+TemplatePortalDirective.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: TemplatePortalDirective, selectors: [["", "cdk-portal", ""], ["", "portal", ""]], exportAs: ["cdkPortal"], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([{
+                provide: CdkPortal,
+                useExisting: TemplatePortalDirective
+            }]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+const ɵTemplatePortalDirective_BaseFactory = /*@__PURE__*/ _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵgetInheritedFactory"](TemplatePortalDirective);
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](TemplatePortalDirective, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[cdk-portal], [portal]',
+                exportAs: 'cdkPortal',
+                providers: [{
+                        provide: CdkPortal,
+                        useExisting: TemplatePortalDirective
+                    }]
+            }]
+    }], null, null); })();
+/**
+ * Directive version of a PortalOutlet. Because the directive *is* a PortalOutlet, portals can be
+ * directly attached to it, enabling declarative use.
+ *
+ * Usage:
+ * `<ng-template [cdkPortalOutlet]="greeting"></ng-template>`
+ */
+class CdkPortalOutlet extends BasePortalOutlet {
+    constructor(_componentFactoryResolver, _viewContainerRef, 
+    /**
+     * @deprecated `_document` parameter to be made required.
+     * @breaking-change 9.0.0
+     */
+    _document) {
+        super();
+        this._componentFactoryResolver = _componentFactoryResolver;
+        this._viewContainerRef = _viewContainerRef;
+        /** Whether the portal component is initialized. */
+        this._isInitialized = false;
+        /** Emits when a portal is attached to the outlet. */
+        this.attached = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        /**
+         * Attaches the given DomPortal to this PortalHost by moving all of the portal content into it.
+         * @param portal Portal to be attached.
+         * @deprecated To be turned into a method.
+         * @breaking-change 10.0.0
+         */
+        this.attachDomPortal = (portal) => {
+            // @breaking-change 9.0.0 Remove check and error once the
+            // `_document` constructor parameter is required.
+            if (!this._document) {
+                throw Error('Cannot attach DOM portal without _document constructor parameter');
+            }
+            const element = portal.element;
+            if (!element.parentNode) {
+                throw Error('DOM portal content must be attached to a parent node.');
+            }
+            // Anchor used to save the element's previous position so
+            // that we can restore it when the portal is detached.
+            const anchorNode = this._document.createComment('dom-portal');
+            portal.setAttachedHost(this);
+            element.parentNode.insertBefore(anchorNode, element);
+            this._getRootNode().appendChild(element);
+            super.setDisposeFn(() => {
+                if (anchorNode.parentNode) {
+                    anchorNode.parentNode.replaceChild(element, anchorNode);
+                }
+            });
+        };
+        this._document = _document;
+    }
+    /** Portal associated with the Portal outlet. */
+    get portal() {
+        return this._attachedPortal;
+    }
+    set portal(portal) {
+        // Ignore the cases where the `portal` is set to a falsy value before the lifecycle hooks have
+        // run. This handles the cases where the user might do something like `<div cdkPortalOutlet>`
+        // and attach a portal programmatically in the parent component. When Angular does the first CD
+        // round, it will fire the setter with empty string, causing the user's content to be cleared.
+        if (this.hasAttached() && !portal && !this._isInitialized) {
+            return;
+        }
+        if (this.hasAttached()) {
+            super.detach();
+        }
+        if (portal) {
+            super.attach(portal);
+        }
+        this._attachedPortal = portal;
+    }
+    /** Component or view reference that is attached to the portal. */
+    get attachedRef() {
+        return this._attachedRef;
+    }
+    ngOnInit() {
+        this._isInitialized = true;
+    }
+    ngOnDestroy() {
+        super.dispose();
+        this._attachedPortal = null;
+        this._attachedRef = null;
+    }
+    /**
+     * Attach the given ComponentPortal to this PortalOutlet using the ComponentFactoryResolver.
+     *
+     * @param portal Portal to be attached to the portal outlet.
+     * @returns Reference to the created component.
+     */
+    attachComponentPortal(portal) {
+        portal.setAttachedHost(this);
+        // If the portal specifies an origin, use that as the logical location of the component
+        // in the application tree. Otherwise use the location of this PortalOutlet.
+        const viewContainerRef = portal.viewContainerRef != null ?
+            portal.viewContainerRef :
+            this._viewContainerRef;
+        const resolver = portal.componentFactoryResolver || this._componentFactoryResolver;
+        const componentFactory = resolver.resolveComponentFactory(portal.component);
+        const ref = viewContainerRef.createComponent(componentFactory, viewContainerRef.length, portal.injector || viewContainerRef.injector);
+        // If we're using a view container that's different from the injected one (e.g. when the portal
+        // specifies its own) we need to move the component into the outlet, otherwise it'll be rendered
+        // inside of the alternate view container.
+        if (viewContainerRef !== this._viewContainerRef) {
+            this._getRootNode().appendChild(ref.hostView.rootNodes[0]);
+        }
+        super.setDisposeFn(() => ref.destroy());
+        this._attachedPortal = portal;
+        this._attachedRef = ref;
+        this.attached.emit(ref);
+        return ref;
+    }
+    /**
+     * Attach the given TemplatePortal to this PortalHost as an embedded View.
+     * @param portal Portal to be attached.
+     * @returns Reference to the created embedded view.
+     */
+    attachTemplatePortal(portal) {
+        portal.setAttachedHost(this);
+        const viewRef = this._viewContainerRef.createEmbeddedView(portal.templateRef, portal.context);
+        super.setDisposeFn(() => this._viewContainerRef.clear());
+        this._attachedPortal = portal;
+        this._attachedRef = viewRef;
+        this.attached.emit(viewRef);
+        return viewRef;
+    }
+    /** Gets the root node of the portal outlet. */
+    _getRootNode() {
+        const nativeElement = this._viewContainerRef.element.nativeElement;
+        // The directive could be set on a template which will result in a comment
+        // node being the root. Use the comment's parent node if that is the case.
+        return (nativeElement.nodeType === nativeElement.ELEMENT_NODE ?
+            nativeElement : nativeElement.parentNode);
+    }
+}
+CdkPortalOutlet.ɵfac = function CdkPortalOutlet_Factory(t) { return new (t || CdkPortalOutlet)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ComponentFactoryResolver"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewContainerRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"])); };
+CdkPortalOutlet.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: CdkPortalOutlet, selectors: [["", "cdkPortalOutlet", ""]], inputs: { portal: ["cdkPortalOutlet", "portal"] }, outputs: { attached: "attached" }, exportAs: ["cdkPortalOutlet"], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+CdkPortalOutlet.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ComponentFactoryResolver"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewContainerRef"] },
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"],] }] }
+];
+CdkPortalOutlet.propDecorators = {
+    attached: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"] }]
+};
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](CdkPortalOutlet, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[cdkPortalOutlet]',
+                exportAs: 'cdkPortalOutlet',
+                inputs: ['portal: cdkPortalOutlet']
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ComponentFactoryResolver"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewContainerRef"] }, { type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]]
+            }] }]; }, { attached: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"]
+        }] }); })();
+/**
+ * @deprecated Use `CdkPortalOutlet` instead.
+ * @breaking-change 9.0.0
+ */
+class PortalHostDirective extends CdkPortalOutlet {
+}
+PortalHostDirective.ɵfac = function PortalHostDirective_Factory(t) { return ɵPortalHostDirective_BaseFactory(t || PortalHostDirective); };
+PortalHostDirective.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: PortalHostDirective, selectors: [["", "cdkPortalHost", ""], ["", "portalHost", ""]], inputs: { portal: ["cdkPortalHost", "portal"] }, exportAs: ["cdkPortalHost"], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([{
+                provide: CdkPortalOutlet,
+                useExisting: PortalHostDirective
+            }]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+const ɵPortalHostDirective_BaseFactory = /*@__PURE__*/ _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵgetInheritedFactory"](PortalHostDirective);
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](PortalHostDirective, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[cdkPortalHost], [portalHost]',
+                exportAs: 'cdkPortalHost',
+                inputs: ['portal: cdkPortalHost'],
+                providers: [{
+                        provide: CdkPortalOutlet,
+                        useExisting: PortalHostDirective
+                    }]
+            }]
+    }], null, null); })();
+class PortalModule {
+}
+PortalModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: PortalModule });
+PortalModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ factory: function PortalModule_Factory(t) { return new (t || PortalModule)(); } });
+(function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](PortalModule, { declarations: [CdkPortal, CdkPortalOutlet, TemplatePortalDirective, PortalHostDirective], exports: [CdkPortal, CdkPortalOutlet, TemplatePortalDirective, PortalHostDirective] }); })();
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](PortalModule, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
+        args: [{
+                exports: [CdkPortal, CdkPortalOutlet, TemplatePortalDirective, PortalHostDirective],
+                declarations: [CdkPortal, CdkPortalOutlet, TemplatePortalDirective, PortalHostDirective]
+            }]
+    }], null, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Custom injector to be used when providing custom
+ * injection tokens to components inside a portal.
+ * @docs-private
+ */
+class PortalInjector {
+    constructor(_parentInjector, _customTokens) {
+        this._parentInjector = _parentInjector;
+        this._customTokens = _customTokens;
+    }
+    get(token, notFoundValue) {
+        const value = this._customTokens.get(token);
+        if (typeof value !== 'undefined') {
+            return value;
+        }
+        return this._parentInjector.get(token, notFoundValue);
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * Generated bundle index. Do not edit.
+ */
+
+
+
+//# sourceMappingURL=portal.js.map
+
+/***/ }),
+
+/***/ "./node_modules/@angular/cdk/fesm2015/coercion.js":
+/*!********************************************************!*\
+  !*** ./node_modules/@angular/cdk/fesm2015/coercion.js ***!
+  \********************************************************/
+/*! exports provided: _isNumberValue, coerceArray, coerceBooleanProperty, coerceCssPixelValue, coerceElement, coerceNumberProperty */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "_isNumberValue", function() { return _isNumberValue; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "coerceArray", function() { return coerceArray; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "coerceBooleanProperty", function() { return coerceBooleanProperty; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "coerceCssPixelValue", function() { return coerceCssPixelValue; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "coerceElement", function() { return coerceElement; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "coerceNumberProperty", function() { return coerceNumberProperty; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/__ivy_ngcc__/fesm2015/core.js");
+
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** Coerces a data-bound value (typically a string) to a boolean. */
+function coerceBooleanProperty(value) {
+    return value != null && `${value}` !== 'false';
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function coerceNumberProperty(value, fallbackValue = 0) {
+    return _isNumberValue(value) ? Number(value) : fallbackValue;
+}
+/**
+ * Whether the provided value is considered a number.
+ * @docs-private
+ */
+function _isNumberValue(value) {
+    // parseFloat(value) handles most of the cases we're interested in (it treats null, empty string,
+    // and other non-number values as NaN, where Number just uses 0) but it considers the string
+    // '123hello' to be a valid number. Therefore we also check if Number(value) is NaN.
+    return !isNaN(parseFloat(value)) && !isNaN(Number(value));
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function coerceArray(value) {
+    return Array.isArray(value) ? value : [value];
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** Coerces a value to a CSS pixel value. */
+function coerceCssPixelValue(value) {
+    if (value == null) {
+        return '';
+    }
+    return typeof value === 'string' ? value : `${value}px`;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Coerces an ElementRef or an Element into an element.
+ * Useful for APIs that can accept either a ref or the native element itself.
+ */
+function coerceElement(elementOrRef) {
+    return elementOrRef instanceof _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] ? elementOrRef.nativeElement : elementOrRef;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+
+//# sourceMappingURL=coercion.js.map
+
+
+/***/ }),
+
 /***/ "./node_modules/@angular/common/__ivy_ngcc__/fesm2015/common.js":
 /*!**********************************************************************!*\
   !*** ./node_modules/@angular/common/__ivy_ngcc__/fesm2015/common.js ***!
@@ -65795,6 +67101,1862 @@ const ɵNgbTimeStructAdapter_BaseFactory = /*@__PURE__*/ _angular_core__WEBPACK_
 
 
 //# sourceMappingURL=ng-bootstrap.js.map
+
+/***/ }),
+
+/***/ "./node_modules/bezier-easing/src/index.js":
+/*!*************************************************!*\
+  !*** ./node_modules/bezier-easing/src/index.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+/**
+ * https://github.com/gre/bezier-easing
+ * BezierEasing - use bezier curve for transition easing function
+ * by Gaëtan Renaudeau 2014 - 2015 – MIT License
+ */
+
+// These values are established by empiricism with tests (tradeoff: performance VS precision)
+var NEWTON_ITERATIONS = 4;
+var NEWTON_MIN_SLOPE = 0.001;
+var SUBDIVISION_PRECISION = 0.0000001;
+var SUBDIVISION_MAX_ITERATIONS = 10;
+
+var kSplineTableSize = 11;
+var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+
+var float32ArraySupported = typeof Float32Array === 'function';
+
+function A (aA1, aA2) { return 1.0 - 3.0 * aA2 + 3.0 * aA1; }
+function B (aA1, aA2) { return 3.0 * aA2 - 6.0 * aA1; }
+function C (aA1)      { return 3.0 * aA1; }
+
+// Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
+function calcBezier (aT, aA1, aA2) { return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT; }
+
+// Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
+function getSlope (aT, aA1, aA2) { return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1); }
+
+function binarySubdivide (aX, aA, aB, mX1, mX2) {
+  var currentX, currentT, i = 0;
+  do {
+    currentT = aA + (aB - aA) / 2.0;
+    currentX = calcBezier(currentT, mX1, mX2) - aX;
+    if (currentX > 0.0) {
+      aB = currentT;
+    } else {
+      aA = currentT;
+    }
+  } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+  return currentT;
+}
+
+function newtonRaphsonIterate (aX, aGuessT, mX1, mX2) {
+ for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
+   var currentSlope = getSlope(aGuessT, mX1, mX2);
+   if (currentSlope === 0.0) {
+     return aGuessT;
+   }
+   var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
+   aGuessT -= currentX / currentSlope;
+ }
+ return aGuessT;
+}
+
+function LinearEasing (x) {
+  return x;
+}
+
+module.exports = function bezier (mX1, mY1, mX2, mY2) {
+  if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
+    throw new Error('bezier x values must be in [0, 1] range');
+  }
+
+  if (mX1 === mY1 && mX2 === mY2) {
+    return LinearEasing;
+  }
+
+  // Precompute samples table
+  var sampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
+  for (var i = 0; i < kSplineTableSize; ++i) {
+    sampleValues[i] = calcBezier(i * kSampleStepSize, mX1, mX2);
+  }
+
+  function getTForX (aX) {
+    var intervalStart = 0.0;
+    var currentSample = 1;
+    var lastSample = kSplineTableSize - 1;
+
+    for (; currentSample !== lastSample && sampleValues[currentSample] <= aX; ++currentSample) {
+      intervalStart += kSampleStepSize;
+    }
+    --currentSample;
+
+    // Interpolate to provide an initial guess for t
+    var dist = (aX - sampleValues[currentSample]) / (sampleValues[currentSample + 1] - sampleValues[currentSample]);
+    var guessForT = intervalStart + dist * kSampleStepSize;
+
+    var initialSlope = getSlope(guessForT, mX1, mX2);
+    if (initialSlope >= NEWTON_MIN_SLOPE) {
+      return newtonRaphsonIterate(aX, guessForT, mX1, mX2);
+    } else if (initialSlope === 0.0) {
+      return guessForT;
+    } else {
+      return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
+    }
+  }
+
+  return function BezierEasing (x) {
+    // Because JavaScript number are imprecise, we should guarantee the extremes are right.
+    if (x === 0) {
+      return 0;
+    }
+    if (x === 1) {
+      return 1;
+    }
+    return calcBezier(getTForX(x), mY1, mY2);
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/ngx-scrollbar/__ivy_ngcc__/fesm2015/ngx-scrollbar-smooth-scroll.js":
+/*!*****************************************************************************************!*\
+  !*** ./node_modules/ngx-scrollbar/__ivy_ngcc__/fesm2015/ngx-scrollbar-smooth-scroll.js ***!
+  \*****************************************************************************************/
+/*! exports provided: SMOOTH_SCROLL_OPTIONS, SmoothScroll, SmoothScrollManager, SmoothScrollModule */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SMOOTH_SCROLL_OPTIONS", function() { return SMOOTH_SCROLL_OPTIONS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SmoothScroll", function() { return SmoothScroll; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SmoothScrollManager", function() { return SmoothScrollManager; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SmoothScrollModule", function() { return SmoothScrollModule; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/__ivy_ngcc__/fesm2015/core.js");
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common */ "./node_modules/@angular/common/__ivy_ngcc__/fesm2015/common.js");
+/* harmony import */ var _angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/cdk/coercion */ "./node_modules/@angular/cdk/fesm2015/coercion.js");
+/* harmony import */ var _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/cdk/platform */ "./node_modules/@angular/cdk/__ivy_ngcc__/fesm2015/platform.js");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm2015/index.js");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm2015/operators/index.js");
+/* harmony import */ var bezier_easing__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! bezier-easing */ "./node_modules/bezier-easing/src/index.js");
+/* harmony import */ var bezier_easing__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(bezier_easing__WEBPACK_IMPORTED_MODULE_6__);
+
+
+
+
+
+
+
+
+
+const SMOOTH_SCROLL_OPTIONS = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["InjectionToken"]('SMOOTH_SCROLL_OPTIONS');
+
+// @dynamic
+class SmoothScrollManager {
+    constructor(_document, _platform, customDefaultOptions) {
+        this._document = _document;
+        this._platform = _platform;
+        // Keeps track of the ongoing SmoothScroll functions so they can be handled in case of duplication.
+        // Each scrolled element gets a destroyer stream which gets deleted immediately after it completes.
+        // Purpose: If user called a scroll function again on the same element before the scrolls completes,
+        // it cancels the ongoing scroll and starts a new one
+        this._onGoingScrolls = new Map();
+        this._defaultOptions = Object.assign({ duration: 468, easing: {
+                x1: 0.42,
+                y1: 0,
+                x2: 0.58,
+                y2: 1
+            } }, customDefaultOptions);
+    }
+    get _w() {
+        return this._document.defaultView;
+    }
+    /**
+     * Timing method
+     */
+    get _now() {
+        return this._w.performance && this._w.performance.now
+            ? this._w.performance.now.bind(this._w.performance)
+            : Date.now;
+    }
+    /**
+     * changes scroll position inside an element
+     */
+    _scrollElement(el, x, y) {
+        el.scrollLeft = x;
+        el.scrollTop = y;
+    }
+    /**
+     * Handles a given parameter of type HTMLElement, ElementRef or selector
+     */
+    _getElement(el, parent) {
+        if (typeof el === 'string') {
+            return (parent || this._document).querySelector(el);
+        }
+        return Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_2__["coerceElement"])(el);
+    }
+    /**
+     * Initializes a destroyer stream, re-initializes it if the element is already being scrolled
+     */
+    _initSmoothScroll(el) {
+        if (this._onGoingScrolls.has(el)) {
+            this._onGoingScrolls.get(el).next();
+        }
+        return this._onGoingScrolls.set(el, new rxjs__WEBPACK_IMPORTED_MODULE_4__["Subject"]()).get(el);
+    }
+    /**
+     * Checks if smooth scroll has reached, cleans up the smooth scroll stream and resolves its promise
+     */
+    _isFinished(context, destroyed, resolve) {
+        if (context.currentX !== context.x || context.currentY !== context.y) {
+            return true;
+        }
+        destroyed.next();
+        resolve();
+        return false;
+    }
+    /**
+     * Terminates an ongoing smooth scroll
+     */
+    _interrupted(el, destroyed) {
+        return Object(rxjs__WEBPACK_IMPORTED_MODULE_4__["merge"])(Object(rxjs__WEBPACK_IMPORTED_MODULE_4__["fromEvent"])(el, 'wheel', { passive: true, capture: true }), Object(rxjs__WEBPACK_IMPORTED_MODULE_4__["fromEvent"])(el, 'touchmove', { passive: true, capture: true }), destroyed).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["take"])(1));
+    }
+    /**
+     * Deletes the destroyer function, runs if the smooth scroll has finished or interrupted
+     */
+    _destroy(el, destroyed) {
+        destroyed.complete();
+        this._onGoingScrolls.delete(el);
+    }
+    /**
+     * A function called recursively that, given a context, steps through scrolling
+     */
+    _step(context) {
+        return new rxjs__WEBPACK_IMPORTED_MODULE_4__["Observable"]((subscriber) => {
+            let elapsed = (this._now() - context.startTime) / context.duration;
+            // avoid elapsed times higher than one
+            elapsed = elapsed > 1 ? 1 : elapsed;
+            // apply easing to elapsed time
+            const value = context.easing(elapsed);
+            context.currentX = context.startX + (context.x - context.startX) * value;
+            context.currentY = context.startY + (context.y - context.startY) * value;
+            this._scrollElement(context.scrollable, context.currentX, context.currentY);
+            // Proceed to the step
+            rxjs__WEBPACK_IMPORTED_MODULE_4__["animationFrameScheduler"].schedule(() => subscriber.next(context));
+        });
+    }
+    _applyScrollToOptions(el, options) {
+        if (!options.duration) {
+            this._scrollElement(el, options.left, options.top);
+            return Promise.resolve();
+        }
+        // Initialize a destroyer stream, reinitialize it if the element is already being scrolled
+        const destroyed = this._initSmoothScroll(el);
+        const context = {
+            scrollable: el,
+            startTime: this._now(),
+            startX: el.scrollLeft,
+            startY: el.scrollTop,
+            x: options.left == null ? el.scrollLeft : ~~options.left,
+            y: options.top == null ? el.scrollTop : ~~options.top,
+            duration: options.duration,
+            easing: bezier_easing__WEBPACK_IMPORTED_MODULE_6___default()(options.easing.x1, options.easing.y1, options.easing.x2, options.easing.y2)
+        };
+        return new Promise(resolve => {
+            // Scroll each step recursively
+            Object(rxjs__WEBPACK_IMPORTED_MODULE_4__["of"])(null).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["expand"])(() => this._step(context).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["takeWhile"])((currContext) => this._isFinished(currContext, destroyed, resolve)))), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["takeUntil"])(this._interrupted(el, destroyed)), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["finalize"])(() => this._destroy(el, destroyed))).subscribe();
+        });
+    }
+    /**
+     * Scrolls to the specified offsets. This is a normalized version of the browser's native scrollTo
+     * method, since browsers are not consistent about what scrollLeft means in RTL. For this method
+     * left and right always refer to the left and right side of the scrolling container irrespective
+     * of the layout direction. start and end refer to left and right in an LTR context and vice-versa
+     * in an RTL context.
+     * @param scrollable element
+     * @param customOptions specified the offsets to scroll to.
+     */
+    scrollTo(scrollable, customOptions) {
+        if (Object(_angular_common__WEBPACK_IMPORTED_MODULE_1__["isPlatformBrowser"])(this._platform)) {
+            const el = this._getElement(scrollable);
+            const isRtl = getComputedStyle(el).direction === 'rtl';
+            const rtlScrollAxisType = Object(_angular_cdk_platform__WEBPACK_IMPORTED_MODULE_3__["getRtlScrollAxisType"])();
+            const options = Object.assign(Object.assign(Object.assign({}, this._defaultOptions), customOptions), {
+                // Rewrite start & end offsets as right or left offsets.
+                left: customOptions.left == null ? (isRtl ? customOptions.end : customOptions.start) : customOptions.left,
+                right: customOptions.right == null ? (isRtl ? customOptions.start : customOptions.end) : customOptions.right
+            });
+            // Rewrite the bottom offset as a top offset.
+            if (options.bottom != null) {
+                options.top = el.scrollHeight - el.clientHeight - options.bottom;
+            }
+            // Rewrite the right offset as a left offset.
+            if (isRtl && rtlScrollAxisType !== 0 /* NORMAL */) {
+                if (options.left != null) {
+                    options.right = el.scrollWidth - el.clientWidth - options.left;
+                }
+                if (rtlScrollAxisType === 2 /* INVERTED */) {
+                    options.left = options.right;
+                }
+                else if (rtlScrollAxisType === 1 /* NEGATED */) {
+                    options.left = options.right ? -options.right : options.right;
+                }
+            }
+            else {
+                if (options.right != null) {
+                    options.left = el.scrollWidth - el.clientWidth - options.right;
+                }
+            }
+            return this._applyScrollToOptions(el, options);
+        }
+        return Promise.resolve();
+    }
+    /**
+     * Scroll to element by reference or selector
+     */
+    scrollToElement(scrollable, target, customOptions) {
+        const scrollableEl = this._getElement(scrollable);
+        const targetEl = this._getElement(target, scrollableEl);
+        const options = Object.assign(Object.assign({}, customOptions), {
+            left: targetEl.offsetLeft + (customOptions.left || 0),
+            top: targetEl.offsetTop + (customOptions.top || 0)
+        });
+        return targetEl ? this.scrollTo(scrollableEl, options) : Promise.resolve();
+    }
+}
+SmoothScrollManager.ɵfac = function SmoothScrollManager_Factory(t) { return new (t || SmoothScrollManager)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["PLATFORM_ID"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](SMOOTH_SCROLL_OPTIONS, 8)); };
+SmoothScrollManager.ɵprov = Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"])({ factory: function SmoothScrollManager_Factory() { return new SmoothScrollManager(Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"])(_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]), Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"])(_angular_core__WEBPACK_IMPORTED_MODULE_0__["PLATFORM_ID"]), Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"])(SMOOTH_SCROLL_OPTIONS, 8)); }, token: SmoothScrollManager, providedIn: "root" });
+SmoothScrollManager.ctorParameters = () => [
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"],] }] },
+    { type: Object, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["PLATFORM_ID"],] }] },
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [SMOOTH_SCROLL_OPTIONS,] }] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](SmoothScrollManager, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"],
+        args: [{
+                providedIn: 'root'
+            }]
+    }], function () { return [{ type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]]
+            }] }, { type: Object, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["PLATFORM_ID"]]
+            }] }, { type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [SMOOTH_SCROLL_OPTIONS]
+            }] }]; }, null); })();
+
+class SmoothScroll {
+    constructor(element, smoothScroll) {
+        this.element = element;
+        this.smoothScroll = smoothScroll;
+    }
+    scrollTo(options) {
+        return this.smoothScroll.scrollTo(this.element, options);
+    }
+    scrollToElement(target, options) {
+        return this.smoothScroll.scrollToElement(this.element, target, options);
+    }
+}
+SmoothScroll.ɵfac = function SmoothScroll_Factory(t) { return new (t || SmoothScroll)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](SmoothScrollManager)); };
+SmoothScroll.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: SmoothScroll, selectors: [["", "smoothScroll", ""], ["", "smooth-scroll", ""]], exportAs: ["smoothScroll"] });
+SmoothScroll.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: SmoothScrollManager }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](SmoothScroll, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[smoothScroll], [smooth-scroll]',
+                exportAs: 'smoothScroll'
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: SmoothScrollManager }]; }, null); })();
+
+class SmoothScrollModule {
+}
+SmoothScrollModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: SmoothScrollModule });
+SmoothScrollModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ factory: function SmoothScrollModule_Factory(t) { return new (t || SmoothScrollModule)(); } });
+(function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](SmoothScrollModule, { declarations: [SmoothScroll], exports: [SmoothScroll] }); })();
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](SmoothScrollModule, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
+        args: [{
+                declarations: [SmoothScroll],
+                exports: [SmoothScroll]
+            }]
+    }], null, null); })();
+
+/**
+ * Generated bundle index. Do not edit.
+ */
+
+
+
+//# sourceMappingURL=ngx-scrollbar-smooth-scroll.js.map
+
+/***/ }),
+
+/***/ "./node_modules/ngx-scrollbar/__ivy_ngcc__/fesm2015/ngx-scrollbar.js":
+/*!***************************************************************************!*\
+  !*** ./node_modules/ngx-scrollbar/__ivy_ngcc__/fesm2015/ngx-scrollbar.js ***!
+  \***************************************************************************/
+/*! exports provided: NG_SCROLLBAR_OPTIONS, NgScrollbar, NgScrollbarModule, ScrollViewport, ScrollbarManager, ɵa, ɵb, ɵc, ɵd, ɵe, ɵf, ɵg, ɵh, ɵi, ɵj, ɵk, ɵl, ɵm, ɵn */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NG_SCROLLBAR_OPTIONS", function() { return NG_SCROLLBAR_OPTIONS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NgScrollbar", function() { return NgScrollbar; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NgScrollbarModule", function() { return NgScrollbarModule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ScrollViewport", function() { return ScrollViewport; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ScrollbarManager", function() { return ScrollbarManager; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵa", function() { return HideNativeScrollbar; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵb", function() { return NativeScrollbarSizeFactory; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵc", function() { return NgAttr; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵd", function() { return ResizeObserverFactory; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵe", function() { return ResizeSensor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵf", function() { return ThumbXDirective; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵg", function() { return ThumbYDirective; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵh", function() { return ThumbAdapter; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵi", function() { return TrackXDirective; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵj", function() { return TrackYDirective; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵk", function() { return TrackAdapter; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵl", function() { return ScrollbarY; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵm", function() { return ScrollbarX; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵn", function() { return Scrollbar; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/__ivy_ngcc__/fesm2015/core.js");
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common */ "./node_modules/@angular/common/__ivy_ngcc__/fesm2015/common.js");
+/* harmony import */ var _angular_cdk_bidi__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/cdk/bidi */ "./node_modules/@angular/cdk/__ivy_ngcc__/fesm2015/bidi.js");
+/* harmony import */ var _angular_cdk_portal__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/cdk/portal */ "./node_modules/@angular/cdk/__ivy_ngcc__/fesm2015/portal.js");
+/* harmony import */ var _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/cdk/platform */ "./node_modules/@angular/cdk/__ivy_ngcc__/fesm2015/platform.js");
+/* harmony import */ var ngx_scrollbar_smooth_scroll__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ngx-scrollbar/smooth-scroll */ "./node_modules/ngx-scrollbar/__ivy_ngcc__/fesm2015/ngx-scrollbar-smooth-scroll.js");
+/* harmony import */ var _angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/cdk/coercion */ "./node_modules/@angular/cdk/fesm2015/coercion.js");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm2015/index.js");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm2015/operators/index.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function NgScrollbar_ng_container_5_scrollbar_x_1_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](0, "scrollbar-x");
+} if (rf & 2) {
+    const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵnextContext"](2);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵattribute"]("scrollable", ctx_r1.state.isHorizontallyScrollable)("fit", ctx_r1.state.verticalUsed);
+} }
+function NgScrollbar_ng_container_5_scrollbar_y_2_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](0, "scrollbar-y");
+} if (rf & 2) {
+    const ctx_r2 = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵnextContext"](2);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵattribute"]("scrollable", ctx_r2.state.isVerticallyScrollable)("fit", ctx_r2.state.horizontalUsed);
+} }
+function NgScrollbar_ng_container_5_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementContainerStart"](0);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](1, NgScrollbar_ng_container_5_scrollbar_x_1_Template, 1, 2, "scrollbar-x", 3);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](2, NgScrollbar_ng_container_5_scrollbar_y_2_Template, 1, 2, "scrollbar-y", 3);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementContainerEnd"]();
+} if (rf & 2) {
+    const ctx_r0 = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵnextContext"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngIf", ctx_r0.state.horizontalUsed);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngIf", ctx_r0.state.verticalUsed);
+} }
+const _c0 = ["*"];
+function preventSelection(doc) {
+    return Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(() => {
+        doc.onselectstart = () => false;
+    });
+}
+function enableSelection(doc) {
+    return Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(() => {
+        doc.onselectstart = null;
+    });
+}
+function stopPropagation() {
+    return Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])((e) => e.stopPropagation());
+}
+/**
+ * Check if pointer is within scrollbar bounds
+ */
+function isWithinBounds(e, rect) {
+    return (e.clientX >= rect.left &&
+        e.clientX <= rect.left + rect.width &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.top + rect.height);
+}
+
+class ScrollViewport {
+    constructor(viewPort, document) {
+        this.viewPort = viewPort;
+        this.document = document;
+        this.nativeElement = viewPort.nativeElement;
+    }
+    // Get viewport size, clientHeight or clientWidth
+    get clientHeight() {
+        return this.nativeElement.clientHeight;
+    }
+    get clientWidth() {
+        return this.nativeElement.clientWidth;
+    }
+    get scrollHeight() {
+        return this.nativeElement.scrollHeight;
+    }
+    get scrollWidth() {
+        return this.nativeElement.scrollWidth;
+    }
+    // Get viewport scroll offset, scrollTop or scrollLeft
+    get scrollTop() {
+        return this.nativeElement.scrollTop;
+    }
+    get scrollLeft() {
+        return this.nativeElement.scrollLeft;
+    }
+    // Get the available scrollable size
+    get scrollMaxX() {
+        return this.scrollWidth - this.clientWidth;
+    }
+    get scrollMaxY() {
+        return this.scrollHeight - this.clientHeight;
+    }
+    get contentHeight() {
+        return this.contentWrapperElement.clientHeight;
+    }
+    /**
+     * Activate viewport pointer events such as 'hovered' and 'clicked' events
+     */
+    activatePointerEvents(propagate, destroyed) {
+        this.hovered = new rxjs__WEBPACK_IMPORTED_MODULE_7__["Observable"]((subscriber) => {
+            // Stream that emits when pointer is moved over the viewport (used to set the hovered state)
+            const mouseMoveStream = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.nativeElement, 'mousemove', { passive: true });
+            const mouseMove = propagate ? mouseMoveStream : mouseMoveStream.pipe(stopPropagation());
+            // Stream that emits when pointer leaves the viewport (used to remove the hovered state)
+            const mouseLeave = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.nativeElement, 'mouseleave').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(() => false));
+            Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["merge"])(mouseMove, mouseLeave).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])((e) => subscriber.next(e)), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeUntil"])(destroyed)).subscribe();
+        });
+        this.clicked = new rxjs__WEBPACK_IMPORTED_MODULE_7__["Observable"]((subscriber) => {
+            const mouseDown = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.nativeElement, 'mousedown', { passive: true }).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])((e) => subscriber.next(e)));
+            const mouseUp = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.nativeElement, 'mouseup', { passive: true }).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(() => subscriber.next(false)));
+            mouseDown.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["switchMap"])(() => mouseUp), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeUntil"])(destroyed)).subscribe();
+        });
+    }
+    /**
+     * Set this directive as a non-functional wrapper, called when a custom viewport is used
+     */
+    setAsWrapper() {
+        // In this case the default viewport and the default content wrapper will act as a mask
+        this.nativeElement.className = 'ng-native-scrollbar-hider ng-scroll-layer';
+        if (this.nativeElement.firstElementChild) {
+            this.nativeElement.firstElementChild.className = 'ng-scroll-layer';
+        }
+    }
+    /**
+     * Set this directive as  the viewport, called when no custom viewport is used
+     */
+    setAsViewport(customClassName) {
+        this.nativeElement.className = `ng-native-scrollbar-hider ng-scroll-viewport ${customClassName}`;
+        // Check if the custom viewport has only one child and set it as the content wrapper
+        if (this.nativeElement.firstElementChild) {
+            this.contentWrapperElement = this.nativeElement.firstElementChild;
+            this.contentWrapperElement.classList.add('ng-scroll-content');
+        }
+    }
+    /**
+     * Scroll viewport vertically
+     */
+    scrollYTo(value) {
+        this.nativeElement.scrollTop = value;
+    }
+    /**
+     * Scroll viewport horizontally
+     */
+    scrollXTo(value) {
+        this.nativeElement.scrollLeft = value;
+    }
+}
+ScrollViewport.ɵfac = function ScrollViewport_Factory(t) { return new (t || ScrollViewport)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"])); };
+ScrollViewport.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: ScrollViewport, selectors: [["", "scrollViewport", ""]] });
+ScrollViewport.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"],] }] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ScrollViewport, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[scrollViewport]'
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]]
+            }] }]; }, null); })();
+
+const NG_SCROLLBAR_OPTIONS = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["InjectionToken"]('NG_SCROLLBAR_OPTIONS');
+
+const defaultOptions = {
+    viewClass: '',
+    trackClass: '',
+    thumbClass: '',
+    track: 'vertical',
+    appearance: 'compact',
+    visibility: 'native',
+    position: 'native',
+    pointerEventsMethod: 'viewport',
+    trackClickScrollDuration: 300,
+    minThumbSize: 20,
+    windowResizeDebounce: 0,
+    sensorDebounce: 0,
+    scrollAuditTime: 0,
+    viewportPropagateMouseMove: true
+};
+class ScrollbarManager {
+    constructor(options) {
+        this.globalOptions = options ? Object.assign(Object.assign({}, defaultOptions), options) : defaultOptions;
+        this.rtlScrollAxisType = Object(_angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["getRtlScrollAxisType"])();
+    }
+}
+ScrollbarManager.ɵfac = function ScrollbarManager_Factory(t) { return new (t || ScrollbarManager)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](NG_SCROLLBAR_OPTIONS, 8)); };
+ScrollbarManager.ɵprov = Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"])({ factory: function ScrollbarManager_Factory() { return new ScrollbarManager(Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"])(NG_SCROLLBAR_OPTIONS, 8)); }, token: ScrollbarManager, providedIn: "root" });
+ScrollbarManager.ctorParameters = () => [
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_SCROLLBAR_OPTIONS,] }] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ScrollbarManager, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"],
+        args: [{ providedIn: 'root' }]
+    }], function () { return [{ type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_SCROLLBAR_OPTIONS]
+            }] }]; }, null); })();
+
+class NgScrollbar {
+    constructor(el, zone, changeDetectorRef, dir, smoothScroll, manager) {
+        this.el = el;
+        this.zone = zone;
+        this.changeDetectorRef = changeDetectorRef;
+        this.dir = dir;
+        this.smoothScroll = smoothScroll;
+        this.manager = manager;
+        this._disabled = false;
+        this._sensorDisabled = this.manager.globalOptions.sensorDisabled;
+        this._pointerEventsDisabled = this.manager.globalOptions.pointerEventsDisabled;
+        this._viewportPropagateMouseMove = this.manager.globalOptions.viewportPropagateMouseMove;
+        /** A class forwarded to scrollable viewport element */
+        this.viewClass = this.manager.globalOptions.viewClass;
+        /** A class forwarded to the scrollbar track element */
+        this.trackClass = this.manager.globalOptions.trackClass;
+        /** A class forwarded to the scrollbar thumb element */
+        this.thumbClass = this.manager.globalOptions.thumbClass;
+        /** Minimum scrollbar thumb size */
+        this.minThumbSize = this.manager.globalOptions.minThumbSize;
+        /** The duration which the scrolling takes to reach its target when scrollbar rail is clicked */
+        this.trackClickScrollDuration = this.manager.globalOptions.trackClickScrollDuration;
+        /**
+         * Sets the pointer events method
+         * Use viewport pointer events  to handle dragging and track click (This makes scrolling work when mouse is over the scrollbar)
+         * Use scrollbar pointer events to handle dragging and track click
+         */
+        this.pointerEventsMethod = this.manager.globalOptions.pointerEventsMethod;
+        /**
+         * Sets the supported scroll track of the viewport, there are 3 options:
+         *
+         * - `vertical` Use both vertical and horizontal scrollbar
+         * - `horizontal` Use both vertical and horizontal scrollbar
+         * - `all` Use both vertical and horizontal scrollbar
+         */
+        this.track = this.manager.globalOptions.track;
+        /**
+         * When to show the scrollbar, and there are 3 options:
+         *
+         * - `native` (default) Scrollbar will be visible when viewport is scrollable like with native scrollbar
+         * - `hover` Scrollbars are hidden by default, only visible on scrolling or hovering
+         * - `always` Scrollbars are always shown even if the viewport is not scrollable
+         */
+        this.visibility = this.manager.globalOptions.visibility;
+        /**
+         *  Sets the appearance of the scrollbar, there are 2 options:
+         *
+         * - `standard` (default) scrollbar space will be reserved just like with native scrollbar.
+         * - `compact` scrollbar doesn't reserve any space, they are placed over the viewport.
+         */
+        this.appearance = this.manager.globalOptions.appearance;
+        /**
+         * Sets the position of each scrollbar, there are 4 options:
+         *
+         * - `native` (Default) Use the default position like in native scrollbar.
+         * - `invertY` Inverts vertical scrollbar position
+         * - `invertX` Inverts Horizontal scrollbar position
+         * - `invertAll` Inverts both scrollbar positions
+         */
+        this.position = this.manager.globalOptions.position;
+        /** Debounce interval for detecting changes via ResizeObserver */
+        this.sensorDebounce = this.manager.globalOptions.sensorDebounce;
+        /** Scroll Audit Time */
+        this.scrollAuditTime = this.manager.globalOptions.scrollAuditTime;
+        /** Steam that emits when scrollbar is updated */
+        this.updated = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        /** Set of attributes added on the scrollbar wrapper */
+        this.state = {};
+        /** Stream that destroys components' observables */
+        this.destroyed = new rxjs__WEBPACK_IMPORTED_MODULE_7__["Subject"]();
+    }
+    /** Disable custom scrollbar and switch back to native scrollbar */
+    get disabled() {
+        return this._disabled;
+    }
+    set disabled(disabled) {
+        this._disabled = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_6__["coerceBooleanProperty"])(disabled);
+    }
+    /** Whether ResizeObserver is disabled */
+    get sensorDisabled() {
+        return this._sensorDisabled;
+    }
+    set sensorDisabled(disabled) {
+        this._sensorDisabled = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_6__["coerceBooleanProperty"])(disabled);
+    }
+    /** A flag used to enable/disable the scrollbar thumb dragged event */
+    get pointerEventsDisabled() {
+        return this._pointerEventsDisabled;
+    }
+    set pointerEventsDisabled(disabled) {
+        this._pointerEventsDisabled = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_6__["coerceBooleanProperty"])(disabled);
+    }
+    /** Enable viewport mousemove event propagation (only when pointerEventsMethod="viewport") */
+    get viewportPropagateMouseMove() {
+        return this._viewportPropagateMouseMove;
+    }
+    set viewportPropagateMouseMove(disabled) {
+        this._viewportPropagateMouseMove = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_6__["coerceBooleanProperty"])(disabled);
+    }
+    get nativeElement() {
+        return this.el.nativeElement;
+    }
+    /**
+     * Update local state with each change detection
+     */
+    updateState() {
+        let verticalUsed = false;
+        let horizontalUsed = false;
+        let isVerticallyScrollable = false;
+        let isHorizontallyScrollable = false;
+        // Check if vertical scrollbar should be displayed
+        if (this.track === 'all' || this.track === 'vertical') {
+            isVerticallyScrollable = this.viewport.scrollHeight > this.viewport.clientHeight;
+            verticalUsed = this.visibility === 'always' || isVerticallyScrollable;
+        }
+        // Check if horizontal scrollbar should be displayed
+        if (this.track === 'all' || this.track === 'horizontal') {
+            isHorizontallyScrollable = this.viewport.scrollWidth > this.viewport.clientWidth;
+            horizontalUsed = this.visibility === 'always' || isHorizontallyScrollable;
+        }
+        // Update inner wrapper attributes
+        this._updateState({
+            position: this.position,
+            track: this.track,
+            appearance: this.appearance,
+            visibility: this.visibility,
+            deactivated: this.disabled,
+            dir: this.dir.value,
+            pointerEventsMethod: this.pointerEventsMethod,
+            verticalUsed,
+            horizontalUsed,
+            isVerticallyScrollable,
+            isHorizontallyScrollable
+        });
+    }
+    _updateState(state) {
+        this.state = Object.assign(Object.assign({}, this.state), state);
+        this.changeDetectorRef.detectChanges();
+    }
+    getScrolledByDirection(property) {
+        let event;
+        return this.scrolled.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])((e) => event = e), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["pluck"])('target', property), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["pairwise"])(), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(([prev, curr]) => prev !== curr), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(() => event));
+    }
+    /**
+     * Set hovered state if a scrollbar is being hovered
+     */
+    setHovered(hovered) {
+        this.zone.run(() => this._updateState(Object.assign({}, hovered)));
+    }
+    /**
+     * Set dragging state if a scrollbar is being dragged
+     */
+    setDragging(dragging) {
+        this.zone.run(() => this._updateState(Object.assign({}, dragging)));
+    }
+    /**
+     * Set clicked state if a scrollbar track is being click
+     */
+    setClicked(scrollbarClicked) {
+        this.zone.run(() => this._updateState({ scrollbarClicked }));
+    }
+    ngOnInit() {
+        // Set the viewport based on user choice
+        this.zone.runOutsideAngular(() => {
+            if (this.customViewPort) {
+                this.viewport = this.customViewPort;
+                this.defaultViewPort.setAsWrapper();
+            }
+            else {
+                this.viewport = this.defaultViewPort;
+            }
+            // Activate the selected viewport
+            this.viewport.setAsViewport(this.viewClass);
+            let scrollStream = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.viewport.nativeElement, 'scroll', { passive: true });
+            // Throttle scroll event if 'scrollAuditTime' is set
+            scrollStream = this.scrollAuditTime ? scrollStream.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["auditTime"])(this.scrollAuditTime)) : scrollStream;
+            // Initialize scroll streams
+            this.scrolled = new rxjs__WEBPACK_IMPORTED_MODULE_7__["Observable"]((subscriber) => scrollStream.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeUntil"])(this.destroyed)).subscribe(subscriber));
+            this.verticalScrolled = this.getScrolledByDirection('scrollTop');
+            this.horizontalScrolled = this.getScrolledByDirection('scrollLeft');
+        });
+    }
+    ngAfterViewChecked() {
+        this.updateState();
+    }
+    ngOnDestroy() {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+    /**
+     * Update local state and the internal scrollbar controls
+     */
+    update() {
+        if (!this.state.horizontalUsed) {
+            // Auto-height: Set component height to content height
+            this.nativeElement.style.height = `${this.viewport.contentHeight}px`;
+        }
+        this.updated.next();
+        this.changeDetectorRef.detectChanges();
+    }
+    /**
+     * Smooth scroll functions
+     */
+    scrollTo(options) {
+        return this.smoothScroll.scrollTo(this.viewport.nativeElement, options);
+    }
+    /**
+     * Scroll to element by reference or selector
+     */
+    scrollToElement(target, options) {
+        return this.smoothScroll.scrollToElement(this.viewport.nativeElement, target, options);
+    }
+}
+NgScrollbar.ɵfac = function NgScrollbar_Factory(t) { return new (t || NgScrollbar)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ChangeDetectorRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_cdk_bidi__WEBPACK_IMPORTED_MODULE_2__["Directionality"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](ngx_scrollbar_smooth_scroll__WEBPACK_IMPORTED_MODULE_5__["SmoothScrollManager"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](ScrollbarManager)); };
+NgScrollbar.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineComponent"]({ type: NgScrollbar, selectors: [["ng-scrollbar"]], contentQueries: function NgScrollbar_ContentQueries(rf, ctx, dirIndex) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵstaticContentQuery"](dirIndex, ScrollViewport, true);
+    } if (rf & 2) {
+        var _t;
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵqueryRefresh"](_t = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵloadQuery"]()) && (ctx.customViewPort = _t.first);
+    } }, viewQuery: function NgScrollbar_Query(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵstaticViewQuery"](ScrollViewport, true);
+    } if (rf & 2) {
+        var _t;
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵqueryRefresh"](_t = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵloadQuery"]()) && (ctx.defaultViewPort = _t.first);
+    } }, hostVars: 2, hostBindings: function NgScrollbar_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵclassProp"]("ng-scrollbar", true);
+    } }, inputs: { viewClass: "viewClass", trackClass: "trackClass", thumbClass: "thumbClass", minThumbSize: "minThumbSize", trackClickScrollDuration: "trackClickScrollDuration", pointerEventsMethod: "pointerEventsMethod", track: "track", visibility: "visibility", appearance: "appearance", position: "position", sensorDebounce: "sensorDebounce", scrollAuditTime: "scrollAuditTime", disabled: "disabled", sensorDisabled: "sensorDisabled", pointerEventsDisabled: "pointerEventsDisabled", viewportPropagateMouseMove: "viewportPropagateMouseMove" }, outputs: { updated: "updated" }, exportAs: ["ngScrollbar"], ngContentSelectors: _c0, decls: 6, vars: 4, consts: [[1, "ng-scrollbar-wrapper", 3, "ngAttr"], [1, "ng-scroll-viewport-wrapper", 3, "sensorDebounce", "sensorDisabled", "resizeSensor"], ["scrollViewport", "", "hideNativeScrollbar", ""], [4, "ngIf"]], template: function NgScrollbar_Template(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵprojectionDef"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](0, "div", 0);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](1, "div", 1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵlistener"]("resizeSensor", function NgScrollbar_Template_div_resizeSensor_1_listener() { return ctx.update(); });
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](2, "div", 2);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](3, "div");
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵprojection"](4);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](5, NgScrollbar_ng_container_5_Template, 3, 2, "ng-container", 3);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+    } if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngAttr", ctx.state);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("sensorDebounce", ctx.sensorDebounce)("sensorDisabled", ctx.sensorDisabled);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](4);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngIf", !ctx.disabled);
+    } }, directives: function () { return [NgAttr, ResizeSensor, ScrollViewport, HideNativeScrollbar, _angular_common__WEBPACK_IMPORTED_MODULE_1__["NgIf"], ScrollbarX, ScrollbarY]; }, styles: [".ng-scrollbar-measure{-ms-overflow-style:none;left:0;overflow:scroll;position:fixed;scrollbar-width:none;top:-9999px}  .ng-scrollbar-measure::-webkit-scrollbar{display:none}[_nghost-%COMP%]{--scrollbar-border-radius:7px;--scrollbar-hover-size:var(--scrollbar-size);--scrollbar-padding:4px;--scrollbar-size:5px;--scrollbar-thumb-color:rgba(0,0,0,0.2);--scrollbar-thumb-hover-color:var(--scrollbar-thumb-color);--scrollbar-thumb-transition:height ease-out 150ms,width ease-out 150ms;--scrollbar-track-color:transparent;--scrollbar-track-transition:height ease-out 150ms,width ease-out 150ms;display:block;height:100%;max-height:100%;max-width:100%;position:relative}[_nghost-%COMP%] > .ng-scrollbar-wrapper[_ngcontent-%COMP%]{--horizontal-scrollbar-size:var(--scrollbar-size);--horizontal-scrollbar-total-size:calc(var(--horizontal-scrollbar-size) + var(--scrollbar-padding)*2);--scrollbar-total-size:calc(var(--scrollbar-size) + var(--scrollbar-padding)*2);--vertical-scrollbar-size:var(--scrollbar-size);--vertical-scrollbar-total-size:calc(var(--vertical-scrollbar-size) + var(--scrollbar-padding)*2)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[verticalDragging=true][_ngcontent-%COMP%], [_nghost-%COMP%] > .ng-scrollbar-wrapper[verticalHovered=true][_ngcontent-%COMP%]{--vertical-scrollbar-size:var(--scrollbar-hover-size);--vertical-scrollbar-total-size:calc(var(--vertical-scrollbar-size) + var(--scrollbar-padding)*2);cursor:default}[_nghost-%COMP%] > .ng-scrollbar-wrapper[horizontalDragging=true][_ngcontent-%COMP%], [_nghost-%COMP%] > .ng-scrollbar-wrapper[horizontalHovered=true][_ngcontent-%COMP%]{--horizontal-scrollbar-size:var(--scrollbar-hover-size);--horizontal-scrollbar-total-size:calc(var(--horizontal-scrollbar-size) + var(--scrollbar-padding)*2);cursor:default}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=ltr][pointerEventsMethod=scrollbar][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%]{left:0;right:var(--scrollbar-total-size)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=ltr][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=ltr][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%]{padding-right:var(--scrollbar-total-size)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=rtl][pointerEventsMethod=scrollbar][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%]{left:var(--scrollbar-total-size);right:0}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=rtl][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=rtl][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%]{padding-left:var(--scrollbar-total-size)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=ltr][pointerEventsMethod=scrollbar][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%], [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=ltr][pointerEventsMethod=scrollbar][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%]{left:var(--scrollbar-total-size);right:0}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=ltr][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=ltr][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%], [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=ltr][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=ltr][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%]{padding-left:var(--scrollbar-total-size)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=rtl][pointerEventsMethod=scrollbar][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%], [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=rtl][pointerEventsMethod=scrollbar][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%]{left:0;right:var(--scrollbar-total-size)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=rtl][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=rtl][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%], [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=rtl][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=rtl][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%]{padding-right:var(--scrollbar-total-size)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][pointerEventsMethod=scrollbar][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%]{bottom:var(--scrollbar-total-size);top:0}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%]{padding-bottom:var(--scrollbar-total-size)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertAll][pointerEventsMethod=scrollbar][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%], [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertX][pointerEventsMethod=scrollbar][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%]{bottom:0;top:var(--scrollbar-total-size)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertAll][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertAll][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%], [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertX][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertX][pointerEventsMethod=viewport][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%]{padding-top:var(--scrollbar-total-size)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%]{-ms-overflow-style:none;scrollbar-width:none}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport::-webkit-scrollbar, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%]::-webkit-scrollbar{display:none}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][horizontalUsed=true][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-native-scrollbar-hider, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][horizontalUsed=true][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-native-scrollbar-hider[_ngcontent-%COMP%]{bottom:var(--native-scrollbar-size)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][verticalUsed=true][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-native-scrollbar-hider, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][verticalUsed=true][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-native-scrollbar-hider[_ngcontent-%COMP%]{left:0;right:var(--native-scrollbar-size)}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][verticalUsed=true][dir=rtl][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-native-scrollbar-hider, [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][verticalUsed=true][dir=rtl][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-native-scrollbar-hider[_ngcontent-%COMP%]{left:var(--native-scrollbar-size);right:0}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][visibility=hover][_ngcontent-%COMP%] > .scrollbar-control[_ngcontent-%COMP%]{opacity:0;transition-delay:.8s;transition-duration:.4s;transition-property:opacity}[_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][visibility=hover][_ngcontent-%COMP%]:active > .scrollbar-control[_ngcontent-%COMP%], [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][visibility=hover][_ngcontent-%COMP%]:focus > .scrollbar-control[_ngcontent-%COMP%], [_nghost-%COMP%] > .ng-scrollbar-wrapper[deactivated=false][visibility=hover][_ngcontent-%COMP%]:hover > .scrollbar-control[_ngcontent-%COMP%]{opacity:1;transition-delay:0ms;transition-duration:.4s}[_nghost-%COMP%] > .ng-scrollbar-wrapper[horizontalUsed=true][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[horizontalUsed=true][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%]{overflow-x:auto;overflow-y:hidden}[_nghost-%COMP%] > .ng-scrollbar-wrapper[verticalUsed=true][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[verticalUsed=true][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%]{overflow-x:hidden;overflow-y:auto}[_nghost-%COMP%] > .ng-scrollbar-wrapper[verticalUsed=true][horizontalUsed=true][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] > *[_ngcontent-%COMP%] >  .ng-scroll-viewport, [_nghost-%COMP%] > .ng-scrollbar-wrapper[verticalUsed=true][horizontalUsed=true][_ngcontent-%COMP%] > .ng-scroll-viewport-wrapper[_ngcontent-%COMP%] > .ng-scroll-viewport[_ngcontent-%COMP%]{overflow:auto}.ng-scroll-viewport-wrapper[_ngcontent-%COMP%]{overflow:hidden}.ng-scroll-viewport[_ngcontent-%COMP%]{-webkit-overflow-scrolling:touch;contain:strict;will-change:scroll-position}  .ng-scroll-content{display:inline-block;min-width:100%;position:relative!important}.ng-scroll-layer[_ngcontent-%COMP%], .ng-scroll-viewport-wrapper[_ngcontent-%COMP%], .ng-scrollbar-wrapper[_ngcontent-%COMP%],   .ng-scroll-viewport{bottom:0;left:0;position:absolute;right:0;top:0}", ".ng-scrollbar-wrapper[pointerEventsMethod=viewport]>.scrollbar-control{pointer-events:none}  .ng-scrollbar-wrapper[horizontalDragging=true]>.ng-scroll-viewport-wrapper>*>*> .ng-scroll-viewport,   .ng-scrollbar-wrapper[horizontalDragging=true]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport,   .ng-scrollbar-wrapper[scrollbarClicked=true]>.ng-scroll-viewport-wrapper>*>*> .ng-scroll-viewport,   .ng-scrollbar-wrapper[scrollbarClicked=true]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport,   .ng-scrollbar-wrapper[verticalDragging=true]>.ng-scroll-viewport-wrapper>*>*> .ng-scroll-viewport,   .ng-scrollbar-wrapper[verticalDragging=true]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{-moz-user-select:none;-ms-user-select:none;-webkit-user-select:none;user-select:none}  .ng-scrollbar-wrapper>.scrollbar-control{align-items:center;display:flex;justify-content:center;position:absolute;transition:var(--scrollbar-track-transition)}  .ng-scrollbar-wrapper>.scrollbar-control[scrollable=false] .ng-scrollbar-thumb{display:none}  .ng-scrollbar-track{background-color:var(--scrollbar-track-color);border-radius:var(--scrollbar-border-radius);cursor:default;height:100%;overflow:hidden;transition:var(--scrollbar-track-transition);width:100%;z-index:1}  .ng-scrollbar-thumb{background-color:var(--scrollbar-thumb-color);border-radius:inherit;box-sizing:border-box;position:relative;transform:translateZ(0);transition:var(--scrollbar-thumb-transition)}"], changeDetection: 0 });
+NgScrollbar.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ChangeDetectorRef"] },
+    { type: _angular_cdk_bidi__WEBPACK_IMPORTED_MODULE_2__["Directionality"] },
+    { type: ngx_scrollbar_smooth_scroll__WEBPACK_IMPORTED_MODULE_5__["SmoothScrollManager"] },
+    { type: ScrollbarManager }
+];
+NgScrollbar.propDecorators = {
+    disabled: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    sensorDisabled: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    pointerEventsDisabled: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    viewportPropagateMouseMove: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    viewClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    trackClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    thumbClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    minThumbSize: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    trackClickScrollDuration: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    pointerEventsMethod: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    track: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    visibility: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    appearance: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    position: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    sensorDebounce: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    scrollAuditTime: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    updated: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"] }],
+    defaultViewPort: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"], args: [ScrollViewport, { static: true },] }],
+    customViewPort: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ContentChild"], args: [ScrollViewport, { static: true },] }]
+};
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](NgScrollbar, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"],
+        args: [{
+                selector: 'ng-scrollbar',
+                exportAs: 'ngScrollbar',
+                template: "<div class=\"ng-scrollbar-wrapper\" [ngAttr]=\"state\">\n  <div class=\"ng-scroll-viewport-wrapper\"\n       (resizeSensor)=\"update()\"\n       [sensorDebounce]=\"sensorDebounce\"\n       [sensorDisabled]=\"sensorDisabled\">\n    <div scrollViewport\n         hideNativeScrollbar>\n      <div>\n        <ng-content></ng-content>\n      </div>\n    </div>\n  </div>\n  <ng-container *ngIf=\"!disabled\">\n    <scrollbar-x *ngIf=\"state.horizontalUsed\"\n                 [attr.scrollable]=\"state.isHorizontallyScrollable\"\n                 [attr.fit]=\"state.verticalUsed\">\n    </scrollbar-x>\n    <scrollbar-y *ngIf=\"state.verticalUsed\"\n                 [attr.scrollable]=\"state.isVerticallyScrollable\"\n                 [attr.fit]=\"state.horizontalUsed\">\n    </scrollbar-y>\n  </ng-container>\n</div>\n\n",
+                changeDetection: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ChangeDetectionStrategy"].OnPush,
+                host: { '[class.ng-scrollbar]': 'true' },
+                styles: ["::ng-deep .ng-scrollbar-measure{-ms-overflow-style:none;left:0;overflow:scroll;position:fixed;scrollbar-width:none;top:-9999px}::ng-deep .ng-scrollbar-measure::-webkit-scrollbar{display:none}:host{--scrollbar-border-radius:7px;--scrollbar-hover-size:var(--scrollbar-size);--scrollbar-padding:4px;--scrollbar-size:5px;--scrollbar-thumb-color:rgba(0,0,0,0.2);--scrollbar-thumb-hover-color:var(--scrollbar-thumb-color);--scrollbar-thumb-transition:height ease-out 150ms,width ease-out 150ms;--scrollbar-track-color:transparent;--scrollbar-track-transition:height ease-out 150ms,width ease-out 150ms;display:block;height:100%;max-height:100%;max-width:100%;position:relative}:host>.ng-scrollbar-wrapper{--horizontal-scrollbar-size:var(--scrollbar-size);--horizontal-scrollbar-total-size:calc(var(--horizontal-scrollbar-size) + var(--scrollbar-padding)*2);--scrollbar-total-size:calc(var(--scrollbar-size) + var(--scrollbar-padding)*2);--vertical-scrollbar-size:var(--scrollbar-size);--vertical-scrollbar-total-size:calc(var(--vertical-scrollbar-size) + var(--scrollbar-padding)*2)}:host>.ng-scrollbar-wrapper[verticalDragging=true],:host>.ng-scrollbar-wrapper[verticalHovered=true]{--vertical-scrollbar-size:var(--scrollbar-hover-size);--vertical-scrollbar-total-size:calc(var(--vertical-scrollbar-size) + var(--scrollbar-padding)*2);cursor:default}:host>.ng-scrollbar-wrapper[horizontalDragging=true],:host>.ng-scrollbar-wrapper[horizontalHovered=true]{--horizontal-scrollbar-size:var(--scrollbar-hover-size);--horizontal-scrollbar-total-size:calc(var(--horizontal-scrollbar-size) + var(--scrollbar-padding)*2);cursor:default}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=ltr][pointerEventsMethod=scrollbar]>.ng-scroll-viewport-wrapper{left:0;right:var(--scrollbar-total-size)}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=ltr][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=ltr][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{padding-right:var(--scrollbar-total-size)}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=rtl][pointerEventsMethod=scrollbar]>.ng-scroll-viewport-wrapper{left:var(--scrollbar-total-size);right:0}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=rtl][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][dir=rtl][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{padding-left:var(--scrollbar-total-size)}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=ltr][pointerEventsMethod=scrollbar]>.ng-scroll-viewport-wrapper,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=ltr][pointerEventsMethod=scrollbar]>.ng-scroll-viewport-wrapper{left:var(--scrollbar-total-size);right:0}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=ltr][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=ltr][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=ltr][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=ltr][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{padding-left:var(--scrollbar-total-size)}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=rtl][pointerEventsMethod=scrollbar]>.ng-scroll-viewport-wrapper,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=rtl][pointerEventsMethod=scrollbar]>.ng-scroll-viewport-wrapper{left:0;right:var(--scrollbar-total-size)}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=rtl][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertAll][dir=rtl][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=rtl][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][verticalUsed=true][position=invertY][dir=rtl][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{padding-right:var(--scrollbar-total-size)}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][pointerEventsMethod=scrollbar]>.ng-scroll-viewport-wrapper{bottom:var(--scrollbar-total-size);top:0}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{padding-bottom:var(--scrollbar-total-size)}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertAll][pointerEventsMethod=scrollbar]>.ng-scroll-viewport-wrapper,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertX][pointerEventsMethod=scrollbar]>.ng-scroll-viewport-wrapper{bottom:0;top:var(--scrollbar-total-size)}:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertAll][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertAll][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertX][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false][appearance=standard][horizontalUsed=true][position=invertX][pointerEventsMethod=viewport]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{padding-top:var(--scrollbar-total-size)}:host>.ng-scrollbar-wrapper[deactivated=false]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[deactivated=false]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{-ms-overflow-style:none;scrollbar-width:none}:host>.ng-scrollbar-wrapper[deactivated=false]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport::-webkit-scrollbar,:host>.ng-scrollbar-wrapper[deactivated=false]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport::-webkit-scrollbar{display:none}:host>.ng-scrollbar-wrapper[deactivated=false][horizontalUsed=true]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-native-scrollbar-hider,:host>.ng-scrollbar-wrapper[deactivated=false][horizontalUsed=true]>.ng-scroll-viewport-wrapper>.ng-native-scrollbar-hider{bottom:var(--native-scrollbar-size)}:host>.ng-scrollbar-wrapper[deactivated=false][verticalUsed=true]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-native-scrollbar-hider,:host>.ng-scrollbar-wrapper[deactivated=false][verticalUsed=true]>.ng-scroll-viewport-wrapper>.ng-native-scrollbar-hider{left:0;right:var(--native-scrollbar-size)}:host>.ng-scrollbar-wrapper[deactivated=false][verticalUsed=true][dir=rtl]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-native-scrollbar-hider,:host>.ng-scrollbar-wrapper[deactivated=false][verticalUsed=true][dir=rtl]>.ng-scroll-viewport-wrapper>.ng-native-scrollbar-hider{left:var(--native-scrollbar-size);right:0}:host>.ng-scrollbar-wrapper[deactivated=false][visibility=hover]>.scrollbar-control{opacity:0;transition-delay:.8s;transition-duration:.4s;transition-property:opacity}:host>.ng-scrollbar-wrapper[deactivated=false][visibility=hover]:active>.scrollbar-control,:host>.ng-scrollbar-wrapper[deactivated=false][visibility=hover]:focus>.scrollbar-control,:host>.ng-scrollbar-wrapper[deactivated=false][visibility=hover]:hover>.scrollbar-control{opacity:1;transition-delay:0ms;transition-duration:.4s}:host>.ng-scrollbar-wrapper[horizontalUsed=true]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[horizontalUsed=true]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{overflow-x:auto;overflow-y:hidden}:host>.ng-scrollbar-wrapper[verticalUsed=true]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[verticalUsed=true]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{overflow-x:hidden;overflow-y:auto}:host>.ng-scrollbar-wrapper[verticalUsed=true][horizontalUsed=true]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,:host>.ng-scrollbar-wrapper[verticalUsed=true][horizontalUsed=true]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{overflow:auto}.ng-scroll-viewport-wrapper{overflow:hidden}.ng-scroll-viewport{-webkit-overflow-scrolling:touch;contain:strict;will-change:scroll-position}::ng-deep .ng-scroll-content{display:inline-block;min-width:100%;position:relative!important}.ng-scroll-layer,.ng-scroll-viewport-wrapper,.ng-scrollbar-wrapper,::ng-deep .ng-scroll-viewport{bottom:0;left:0;position:absolute;right:0;top:0}", "::ng-deep .ng-scrollbar-wrapper[pointerEventsMethod=viewport]>.scrollbar-control{pointer-events:none}::ng-deep .ng-scrollbar-wrapper[horizontalDragging=true]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,::ng-deep .ng-scrollbar-wrapper[horizontalDragging=true]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport,::ng-deep .ng-scrollbar-wrapper[scrollbarClicked=true]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,::ng-deep .ng-scrollbar-wrapper[scrollbarClicked=true]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport,::ng-deep .ng-scrollbar-wrapper[verticalDragging=true]>.ng-scroll-viewport-wrapper>*>*>::ng-deep.ng-scroll-viewport,::ng-deep .ng-scrollbar-wrapper[verticalDragging=true]>.ng-scroll-viewport-wrapper>.ng-scroll-viewport{-moz-user-select:none;-ms-user-select:none;-webkit-user-select:none;user-select:none}::ng-deep .ng-scrollbar-wrapper>.scrollbar-control{align-items:center;display:flex;justify-content:center;position:absolute;transition:var(--scrollbar-track-transition)}::ng-deep .ng-scrollbar-wrapper>.scrollbar-control[scrollable=false] .ng-scrollbar-thumb{display:none}::ng-deep .ng-scrollbar-track{background-color:var(--scrollbar-track-color);border-radius:var(--scrollbar-border-radius);cursor:default;height:100%;overflow:hidden;transition:var(--scrollbar-track-transition);width:100%;z-index:1}::ng-deep .ng-scrollbar-thumb{background-color:var(--scrollbar-thumb-color);border-radius:inherit;box-sizing:border-box;position:relative;transform:translateZ(0);transition:var(--scrollbar-thumb-transition)}"]
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ChangeDetectorRef"] }, { type: _angular_cdk_bidi__WEBPACK_IMPORTED_MODULE_2__["Directionality"] }, { type: ngx_scrollbar_smooth_scroll__WEBPACK_IMPORTED_MODULE_5__["SmoothScrollManager"] }, { type: ScrollbarManager }]; }, { viewClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], trackClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], thumbClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], minThumbSize: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], trackClickScrollDuration: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], pointerEventsMethod: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], track: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], visibility: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], appearance: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], position: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], sensorDebounce: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], scrollAuditTime: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], updated: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"]
+        }], disabled: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], sensorDisabled: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], pointerEventsDisabled: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], viewportPropagateMouseMove: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], defaultViewPort: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"],
+            args: [ScrollViewport, { static: true }]
+        }], customViewPort: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ContentChild"],
+            args: [ScrollViewport, { static: true }]
+        }] }); })();
+
+class NativeScrollbarSizeFactory {
+    constructor(document, manager, platform) {
+        this.document = document;
+        this.manager = manager;
+        this.platform = platform;
+        this._scrollbarSize = new rxjs__WEBPACK_IMPORTED_MODULE_7__["BehaviorSubject"](this.getNativeScrollbarSize());
+        this.scrollbarSize = this._scrollbarSize.asObservable();
+        // Calculate native scrollbar size on window resize event, because the size changes if use zoomed in/out
+        if (platform.isBrowser) {
+            Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.document.defaultView, 'resize', { passive: true }).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["debounceTime"])(this.manager.globalOptions.windowResizeDebounce), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(() => this.getNativeScrollbarSize()), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["distinctUntilChanged"])(), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])((size) => this._scrollbarSize.next(size))).subscribe();
+        }
+    }
+    /**
+     * Get native scrollbar size
+     */
+    getNativeScrollbarSize() {
+        // Avoid executing browser code in server side rendering
+        if (!this.platform.isBrowser) {
+            return 0;
+        }
+        // Hide iOS browsers native scrollbar
+        if (this.platform.IOS) {
+            return 6;
+        }
+        const box = this.document.createElement('div');
+        box.className = 'ng-scrollbar-measure';
+        this.document.body.appendChild(box);
+        const size = box.getBoundingClientRect().right;
+        this.document.body.removeChild(box);
+        return size;
+    }
+}
+NativeScrollbarSizeFactory.ɵfac = function NativeScrollbarSizeFactory_Factory(t) { return new (t || NativeScrollbarSizeFactory)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](ScrollbarManager), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"])); };
+NativeScrollbarSizeFactory.ɵprov = Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"])({ factory: function NativeScrollbarSizeFactory_Factory() { return new NativeScrollbarSizeFactory(Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"])(_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]), Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"])(ScrollbarManager), Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"])(_angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"])); }, token: NativeScrollbarSizeFactory, providedIn: "root" });
+NativeScrollbarSizeFactory.ctorParameters = () => [
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"],] }] },
+    { type: ScrollbarManager },
+    { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](NativeScrollbarSizeFactory, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"],
+        args: [{ providedIn: 'root' }]
+    }], function () { return [{ type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]]
+            }] }, { type: ScrollbarManager }, { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] }]; }, null); })();
+
+class HideNativeScrollbar {
+    constructor(el, renderer, hideNativeScrollbar) {
+        this.renderer = renderer;
+        this.hideNativeScrollbar = hideNativeScrollbar;
+        this._subscriber = rxjs__WEBPACK_IMPORTED_MODULE_7__["Subscription"].EMPTY;
+        this._subscriber = hideNativeScrollbar.scrollbarSize.subscribe((size) => {
+            this.renderer.setStyle(el.nativeElement, '--native-scrollbar-size', `-${size}px`, _angular_core__WEBPACK_IMPORTED_MODULE_0__["RendererStyleFlags2"].DashCase);
+        });
+    }
+    ngOnDestroy() {
+        this._subscriber.unsubscribe();
+    }
+}
+HideNativeScrollbar.ɵfac = function HideNativeScrollbar_Factory(t) { return new (t || HideNativeScrollbar)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NativeScrollbarSizeFactory)); };
+HideNativeScrollbar.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: HideNativeScrollbar, selectors: [["", "hideNativeScrollbar", ""]] });
+HideNativeScrollbar.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] },
+    { type: NativeScrollbarSizeFactory }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](HideNativeScrollbar, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[hideNativeScrollbar]'
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] }, { type: NativeScrollbarSizeFactory }]; }, null); })();
+
+class NgAttr {
+    constructor(el) {
+        this.el = el;
+    }
+    set ngAttr(attrs) {
+        for (const [key, value] of Object.entries(attrs)) {
+            this.el.nativeElement.setAttribute(key, value);
+        }
+    }
+}
+NgAttr.ɵfac = function NgAttr_Factory(t) { return new (t || NgAttr)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"])); };
+NgAttr.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: NgAttr, selectors: [["", "ngAttr", ""]], inputs: { ngAttr: "ngAttr" } });
+NgAttr.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }
+];
+NgAttr.propDecorators = {
+    ngAttr: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }]
+};
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](NgAttr, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[ngAttr]' }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }]; }, { ngAttr: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+
+/**
+ * Factory that initialize the ResizeObserver if available in the browser
+ * Otherwise, it lazy-loads the ResizeObserver polyfill
+ */
+class ResizeObserverFactory {
+    constructor(document, platform) {
+        this.resizeObserverSource = new rxjs__WEBPACK_IMPORTED_MODULE_7__["BehaviorSubject"](null);
+        this.resizeObserverLoader = this.resizeObserverSource.asObservable();
+        if (platform.isBrowser) {
+            const resizeObserverApi = document.defaultView.ResizeObserver
+                ? Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["of"])(document.defaultView.ResizeObserver)
+                : Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["from"])(__webpack_require__.e(/*! import() | juggle-resize-observer */ "juggle-resize-observer").then(__webpack_require__.bind(null, /*! @juggle/resize-observer */ "./node_modules/@juggle/resize-observer/lib/exports/resize-observer.js"))).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])((module) => module.ResizeObserver), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["catchError"])((e) => {
+                    console.log('Unable to load ResizeObserver polyfill', e);
+                    return rxjs__WEBPACK_IMPORTED_MODULE_7__["EMPTY"];
+                }));
+            this.resizeObserverSource.next(resizeObserverApi);
+        }
+    }
+}
+ResizeObserverFactory.ɵfac = function ResizeObserverFactory_Factory(t) { return new (t || ResizeObserverFactory)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"](_angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"])); };
+ResizeObserverFactory.ɵprov = Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"])({ factory: function ResizeObserverFactory_Factory() { return new ResizeObserverFactory(Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"])(_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]), Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵinject"])(_angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"])); }, token: ResizeObserverFactory, providedIn: "root" });
+ResizeObserverFactory.ctorParameters = () => [
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"],] }] },
+    { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ResizeObserverFactory, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"],
+        args: [{ providedIn: 'root' }]
+    }], function () { return [{ type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]]
+            }] }, { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] }]; }, null); })();
+class ResizeSensor {
+    constructor(zone, platform, resizeObserverFactory, scrollbar) {
+        this.zone = zone;
+        this.platform = platform;
+        this.resizeObserverFactory = resizeObserverFactory;
+        this.scrollbar = scrollbar;
+        this._disabled = false;
+        this._subscription = null;
+        this.resizeSensor = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        if (!scrollbar) {
+            throw new Error('[NgScrollbar Resize Sensor Directive]: Host element must be an NgScrollbar component.');
+        }
+    }
+    /** Debounce interval for emitting the changes. */
+    get debounce() {
+        return this._debounce;
+    }
+    set debounce(value) {
+        this._debounce = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_6__["coerceNumberProperty"])(value);
+        this._subscribe();
+    }
+    /** Whether ResizeObserver is disabled. */
+    get disabled() {
+        return this._disabled;
+    }
+    set disabled(value) {
+        this._disabled = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_6__["coerceBooleanProperty"])(value);
+        this._disabled ? this._unsubscribe() : this._subscribe();
+    }
+    ngAfterContentInit() {
+        if (!this._subscription && !this._disabled) {
+            this._subscribe();
+        }
+    }
+    ngOnDestroy() {
+        this._unsubscribe();
+    }
+    _createObserver(ResizeObserver) {
+        return new rxjs__WEBPACK_IMPORTED_MODULE_7__["Observable"]((observer) => {
+            this._resizeObserver = new ResizeObserver(() => observer.next());
+            this._resizeObserver.observe(this.scrollbar.viewport.nativeElement);
+            if (this.scrollbar.viewport.contentWrapperElement) {
+                this._resizeObserver.observe(this.scrollbar.viewport.contentWrapperElement);
+            }
+        });
+    }
+    _subscribe() {
+        this._unsubscribe();
+        if (this.platform.isBrowser) {
+            this.zone.runOutsideAngular(() => {
+                this._subscription = this.resizeObserverFactory.resizeObserverLoader.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["switchMap"])((moduleObservable) => moduleObservable), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["switchMap"])((ResizeObserver) => {
+                    if (ResizeObserver) {
+                        const stream = this._createObserver(ResizeObserver);
+                        return this.debounce ? stream.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["debounceTime"])(this._debounce)) : stream;
+                    }
+                    else {
+                        return rxjs__WEBPACK_IMPORTED_MODULE_7__["EMPTY"];
+                    }
+                })).subscribe(() => this.resizeSensor.emit());
+            });
+        }
+    }
+    _unsubscribe() {
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+        }
+        if (this._subscription) {
+            this._subscription.unsubscribe();
+        }
+    }
+}
+ResizeSensor.ɵfac = function ResizeSensor_Factory(t) { return new (t || ResizeSensor)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](ResizeObserverFactory), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NgScrollbar)); };
+ResizeSensor.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: ResizeSensor, selectors: [["", "resizeSensor", ""]], inputs: { debounce: ["sensorDebounce", "debounce"], disabled: ["sensorDisabled", "disabled"] }, outputs: { resizeSensor: "resizeSensor" } });
+ResizeSensor.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] },
+    { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] },
+    { type: ResizeObserverFactory },
+    { type: NgScrollbar }
+];
+ResizeSensor.propDecorators = {
+    debounce: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['sensorDebounce',] }],
+    disabled: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['sensorDisabled',] }],
+    resizeSensor: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"] }]
+};
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ResizeSensor, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[resizeSensor]' }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] }, { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] }, { type: ResizeObserverFactory }, { type: NgScrollbar }]; }, { resizeSensor: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"]
+        }], debounce: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['sensorDebounce']
+        }], disabled: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['sensorDisabled']
+        }] }); })();
+
+// @dynamic
+class TrackAdapter {
+    constructor(cmp, trackElement, document) {
+        this.cmp = cmp;
+        this.trackElement = trackElement;
+        this.document = document;
+    }
+    // Stream that emits when the track element is clicked
+    get clicked() {
+        const mouseDown = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.trackElement, 'mousedown', { passive: true }).pipe(stopPropagation(), preventSelection(this.document));
+        const mouseup = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.document, 'mouseup', { passive: true }).pipe(stopPropagation(), enableSelection(this.document), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["switchMap"])(() => rxjs__WEBPACK_IMPORTED_MODULE_7__["EMPTY"]));
+        return Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["merge"])(mouseDown, mouseup);
+    }
+    // Stream that emits when the track element is hovered
+    get hovered() {
+        const mouseEnter = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.trackElement, 'mouseenter', { passive: true }).pipe(stopPropagation(), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(() => true));
+        const mouseLeave = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.trackElement, 'mouseleave', { passive: true }).pipe(stopPropagation(), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(() => false));
+        return Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["merge"])(mouseEnter, mouseLeave);
+    }
+    // Get track client rect
+    get clientRect() {
+        return this.trackElement.getBoundingClientRect();
+    }
+    /**
+     * Stream that emits when scrollbar track is clicked
+     */
+    onTrackClicked(e, thumbSize, scrollSize) {
+        return Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["of"])(e).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["pluck"])(this.pageProperty), 
+        // Calculate scrollTo position
+        Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])((pageOffset) => {
+            const clickOffset = pageOffset - this.offset;
+            const offset = clickOffset - (thumbSize / 2);
+            const ratio = offset / this.size;
+            return ratio * scrollSize;
+        }), 
+        // Smooth scroll to position
+        Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])((value) => {
+            this.cmp.scrollTo(Object.assign(Object.assign({}, this.mapToScrollToOption(value)), { duration: Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_6__["coerceNumberProperty"])(this.cmp.trackClickScrollDuration) }));
+        }));
+    }
+}
+TrackAdapter.ɵfac = function TrackAdapter_Factory(t) { return new (t || TrackAdapter)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NgScrollbar), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](HTMLElement), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](undefined)); };
+TrackAdapter.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: TrackAdapter });
+TrackAdapter.ctorParameters = () => [
+    { type: NgScrollbar },
+    { type: HTMLElement },
+    { type: undefined }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](TrackAdapter, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"]
+    }], function () { return [{ type: NgScrollbar }, { type: HTMLElement }, { type: undefined }]; }, null); })();
+
+// @dynamic
+class ThumbAdapter {
+    constructor(cmp, thumbElement, document) {
+        this.cmp = cmp;
+        this.thumbElement = thumbElement;
+        this.document = document;
+        // Stream that emits dragging state
+        this._dragging = new rxjs__WEBPACK_IMPORTED_MODULE_7__["Subject"]();
+        this.dragging = this._dragging.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["distinctUntilChanged"])());
+    }
+    get trackMax() {
+        return this.track.size - this.size;
+    }
+    // Get thumb client rect
+    get clientRect() {
+        return this.thumbElement.getBoundingClientRect();
+    }
+    // Stream that emits when scrollbar thumb is clicked
+    get clicked() {
+        return Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.thumbElement, 'mousedown', { passive: true }).pipe(stopPropagation());
+    }
+    // Calculate and update thumb position and size
+    update() {
+        const size = calculateThumbSize(this.track.size, this.viewportScrollSize, this.cmp.minThumbSize);
+        const position = calculateThumbPosition(this.viewportScrollOffset, this.viewportScrollMax, this.trackMax);
+        rxjs__WEBPACK_IMPORTED_MODULE_7__["animationFrameScheduler"].schedule(() => this.updateStyles(this.handleDirection(position, this.trackMax), size));
+    }
+    /**
+     * Stream that emits the 'scrollTo' position when a scrollbar thumb element is dragged
+     * This function is called by thumb drag event using viewport or scrollbar pointer events
+     */
+    dragged(event) {
+        let trackMaxStart;
+        let scrollMaxStart;
+        const dragStart = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["of"])(event).pipe(preventSelection(this.document), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(() => {
+            // Capture scrollMax and trackMax once
+            trackMaxStart = this.trackMax;
+            scrollMaxStart = this.viewportScrollMax;
+            this.setDragging(true);
+        }));
+        const dragging = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.document, 'mousemove', { capture: true, passive: true }).pipe(stopPropagation());
+        const dragEnd = Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["fromEvent"])(this.document, 'mouseup', { capture: true }).pipe(stopPropagation(), enableSelection(this.document), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(() => this.setDragging(false)));
+        return dragStart.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["pluck"])(this.pageProperty), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])((pageOffset) => pageOffset - this.dragStartOffset), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["mergeMap"])((mouseDownOffset) => dragging.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["pluck"])(this.clientProperty), 
+        // Calculate how far the pointer is from the top/left of the scrollbar (minus the dragOffset).
+        Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])((mouseOffset) => mouseOffset - this.track.offset), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])((offset) => scrollMaxStart * (offset - mouseDownOffset) / trackMaxStart), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])((position) => this.handleDrag(position, scrollMaxStart)), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])((position) => this.scrollTo(position)), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeUntil"])(dragEnd))));
+    }
+}
+ThumbAdapter.ɵfac = function ThumbAdapter_Factory(t) { return new (t || ThumbAdapter)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NgScrollbar), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](HTMLElement), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](undefined)); };
+ThumbAdapter.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: ThumbAdapter, inputs: { track: "track" }, outputs: { dragging: "dragging" } });
+ThumbAdapter.ctorParameters = () => [
+    { type: NgScrollbar },
+    { type: HTMLElement },
+    { type: undefined }
+];
+ThumbAdapter.propDecorators = {
+    track: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    dragging: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"] }]
+};
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ThumbAdapter, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"]
+    }], function () { return [{ type: NgScrollbar }, { type: HTMLElement }, { type: undefined }]; }, { dragging: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"]
+        }], track: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+/**
+ * Calculate scrollbar thumb size
+ */
+function calculateThumbSize(trackSize, contentSize, minThumbSize) {
+    const scrollbarRatio = trackSize / contentSize;
+    const thumbSize = scrollbarRatio * trackSize;
+    return Math.max(~~thumbSize, minThumbSize);
+}
+/**
+ * Calculate scrollbar thumb position
+ */
+function calculateThumbPosition(scrollPosition, scrollMax, trackMax) {
+    return scrollPosition * trackMax / scrollMax;
+}
+
+class ThumbXDirective extends ThumbAdapter {
+    constructor(cmp, element, document, dir) {
+        super(cmp, element.nativeElement, document);
+        this.cmp = cmp;
+        this.element = element;
+        this.document = document;
+        this.dir = dir;
+    }
+    get clientProperty() {
+        return 'clientX';
+    }
+    get pageProperty() {
+        return 'pageX';
+    }
+    get viewportScrollSize() {
+        return this.cmp.viewport.scrollWidth;
+    }
+    get viewportScrollOffset() {
+        return this.cmp.viewport.scrollLeft;
+    }
+    get viewportScrollMax() {
+        return this.cmp.viewport.scrollMaxX;
+    }
+    get dragStartOffset() {
+        return this.clientRect.left;
+    }
+    get size() {
+        return this.thumbElement.clientWidth;
+    }
+    updateStyles(position, size) {
+        this.thumbElement.style.width = `${size}px`;
+        this.thumbElement.style.transform = `translate3d(${position}px, 0, 0)`;
+    }
+    handleDrag(position, scrollMax) {
+        if (this.dir.value === 'rtl') {
+            if (this.cmp.manager.rtlScrollAxisType === 1 /* NEGATED */) {
+                return position - scrollMax;
+            }
+            if (this.cmp.manager.rtlScrollAxisType === 2 /* INVERTED */) {
+                return scrollMax - position;
+            }
+            // Keeping this as a memo
+            // if (this.rtlScrollAxisType === RtlScrollAxisType.NORMAL) {
+            //   return position;
+            // }
+        }
+        return position;
+    }
+    handleDirection(position, trackMax) {
+        if (this.dir.value === 'rtl') {
+            if (this.cmp.manager.rtlScrollAxisType === 2 /* INVERTED */) {
+                return -position;
+            }
+            if (this.cmp.manager.rtlScrollAxisType === 0 /* NORMAL */) {
+                return position - trackMax;
+            }
+            // Keeping this as a memo
+            // if (this.rtlScrollAxisType === RtlScrollAxisType.NEGATED) {
+            //   return position;
+            // }
+        }
+        return position;
+    }
+    setDragging(value) {
+        this.cmp.setDragging({ horizontalDragging: value });
+    }
+    scrollTo(position) {
+        this.cmp.viewport.scrollXTo(position);
+    }
+}
+ThumbXDirective.ɵfac = function ThumbXDirective_Factory(t) { return new (t || ThumbXDirective)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NgScrollbar), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_cdk_bidi__WEBPACK_IMPORTED_MODULE_2__["Directionality"])); };
+ThumbXDirective.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: ThumbXDirective, selectors: [["", "scrollbarThumbX", ""]], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+ThumbXDirective.ctorParameters = () => [
+    { type: NgScrollbar },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"],] }] },
+    { type: _angular_cdk_bidi__WEBPACK_IMPORTED_MODULE_2__["Directionality"] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ThumbXDirective, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[scrollbarThumbX]' }]
+    }], function () { return [{ type: NgScrollbar }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]]
+            }] }, { type: _angular_cdk_bidi__WEBPACK_IMPORTED_MODULE_2__["Directionality"] }]; }, null); })();
+class ThumbYDirective extends ThumbAdapter {
+    constructor(cmp, element, document) {
+        super(cmp, element.nativeElement, document);
+        this.cmp = cmp;
+        this.element = element;
+        this.document = document;
+    }
+    get pageProperty() {
+        return 'pageY';
+    }
+    get viewportScrollSize() {
+        return this.cmp.viewport.scrollHeight;
+    }
+    get viewportScrollOffset() {
+        return this.cmp.viewport.scrollTop;
+    }
+    get viewportScrollMax() {
+        return this.cmp.viewport.scrollMaxY;
+    }
+    get clientProperty() {
+        return 'clientY';
+    }
+    get dragStartOffset() {
+        return this.clientRect.top;
+    }
+    get size() {
+        return this.thumbElement.clientHeight;
+    }
+    updateStyles(position, size) {
+        this.thumbElement.style.height = `${size}px`;
+        this.thumbElement.style.transform = `translate3d(0px, ${position}px, 0)`;
+    }
+    handleDrag(position) {
+        return position;
+    }
+    handleDirection(position) {
+        return position;
+    }
+    setDragging(value) {
+        this.cmp.setDragging({ verticalDragging: value });
+    }
+    scrollTo(position) {
+        this.cmp.viewport.scrollYTo(position);
+    }
+}
+ThumbYDirective.ɵfac = function ThumbYDirective_Factory(t) { return new (t || ThumbYDirective)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NgScrollbar), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"])); };
+ThumbYDirective.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: ThumbYDirective, selectors: [["", "scrollbarThumbY", ""]], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+ThumbYDirective.ctorParameters = () => [
+    { type: NgScrollbar },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"],] }] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ThumbYDirective, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[scrollbarThumbY]' }]
+    }], function () { return [{ type: NgScrollbar }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]]
+            }] }]; }, null); })();
+
+class TrackXDirective extends TrackAdapter {
+    constructor(cmp, trackElement, document) {
+        super(cmp, trackElement.nativeElement, document);
+        this.cmp = cmp;
+        this.document = document;
+    }
+    get pageProperty() {
+        return 'pageX';
+    }
+    get offset() {
+        return this.clientRect.left;
+    }
+    get size() {
+        return this.trackElement.clientWidth;
+    }
+    mapToScrollToOption(value) {
+        return { left: value };
+    }
+}
+TrackXDirective.ɵfac = function TrackXDirective_Factory(t) { return new (t || TrackXDirective)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NgScrollbar), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"])); };
+TrackXDirective.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: TrackXDirective, selectors: [["", "scrollbarTrackX", ""]], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+TrackXDirective.ctorParameters = () => [
+    { type: NgScrollbar },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"],] }] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](TrackXDirective, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[scrollbarTrackX]' }]
+    }], function () { return [{ type: NgScrollbar }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]]
+            }] }]; }, null); })();
+class TrackYDirective extends TrackAdapter {
+    constructor(cmp, trackElement, document) {
+        super(cmp, trackElement.nativeElement, document);
+        this.cmp = cmp;
+        this.document = document;
+    }
+    get pageProperty() {
+        return 'pageY';
+    }
+    get offset() {
+        return this.clientRect.top;
+    }
+    get size() {
+        return this.trackElement.clientHeight;
+    }
+    mapToScrollToOption(value) {
+        return { top: value };
+    }
+}
+TrackYDirective.ɵfac = function TrackYDirective_Factory(t) { return new (t || TrackYDirective)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NgScrollbar), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"])); };
+TrackYDirective.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: TrackYDirective, selectors: [["", "scrollbarTrackY", ""]], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+TrackYDirective.ctorParameters = () => [
+    { type: NgScrollbar },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"],] }] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](TrackYDirective, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[scrollbarTrackY]' }]
+    }], function () { return [{ type: NgScrollbar }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]]
+            }] }]; }, null); })();
+
+class Scrollbar {
+    constructor(cmp, platform, document, zone) {
+        this.cmp = cmp;
+        this.platform = platform;
+        this.document = document;
+        this.zone = zone;
+        // Stream that emits to unsubscribe from all streams
+        this.destroyed = new rxjs__WEBPACK_IMPORTED_MODULE_7__["Subject"]();
+    }
+    /**
+     * Activate scrollbar pointer events
+     */
+    activatePointerEvents() {
+        // Stream that emits when scrollbar thumb is dragged
+        let thumbDragEvent = rxjs__WEBPACK_IMPORTED_MODULE_7__["EMPTY"];
+        // Stream that emits when scrollbar track is clicked
+        let trackClickEvent = rxjs__WEBPACK_IMPORTED_MODULE_7__["EMPTY"];
+        // Stream that emits when scrollbar track is hovered
+        let trackHoveredEvent = rxjs__WEBPACK_IMPORTED_MODULE_7__["EMPTY"];
+        // Set the method used for the pointer events option
+        if (this.cmp.pointerEventsMethod === 'viewport') {
+            // Pointer events using the viewport
+            this.viewportTrackClicked = new rxjs__WEBPACK_IMPORTED_MODULE_7__["Subject"]();
+            this.viewportThumbClicked = new rxjs__WEBPACK_IMPORTED_MODULE_7__["Subject"]();
+            // Activate the pointer events of the viewport directive
+            this.cmp.viewport.activatePointerEvents(this.cmp.viewportPropagateMouseMove, this.destroyed);
+            // Set streams
+            thumbDragEvent = this.viewportThumbClicked;
+            trackClickEvent = this.viewportTrackClicked;
+            trackHoveredEvent = this.cmp.viewport.hovered.pipe(
+            // Check if track is hovered
+            Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])((e) => isWithinBounds(e, this.track.clientRect)), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["distinctUntilChanged"])(), 
+            // Enable / disable text selection
+            Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])((hovered) => this.document.onselectstart = hovered ? () => false : null));
+            this.cmp.viewport.clicked.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])((e) => {
+                if (e) {
+                    if (isWithinBounds(e, this.thumb.clientRect)) {
+                        this.viewportThumbClicked.next(e);
+                    }
+                    else if (isWithinBounds(e, this.track.clientRect)) {
+                        this.cmp.setClicked(true);
+                        this.viewportTrackClicked.next(e);
+                    }
+                }
+                else {
+                    this.cmp.setClicked(false);
+                }
+            }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeUntil"])(this.destroyed)).subscribe();
+        }
+        else {
+            // Pointer events method is using 'scrollbar'
+            thumbDragEvent = this.thumb.clicked;
+            trackClickEvent = this.track.clicked;
+            trackHoveredEvent = this.track.hovered;
+        }
+        return Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["merge"])(
+        // Activate scrollbar hovered event
+        trackHoveredEvent.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])((e) => this.setHovered(e))), 
+        // Activate scrollbar thumb drag event
+        thumbDragEvent.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["switchMap"])((e) => this.thumb.dragged(e))), 
+        // Activate scrollbar track click event
+        trackClickEvent.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["switchMap"])((e) => this.track.onTrackClicked(e, this.thumb.size, this.viewportScrollSize))));
+    }
+    ngOnInit() {
+        this.zone.runOutsideAngular(() => {
+            // Activate pointer events on Desktop only
+            if (!(this.platform.IOS || this.platform.ANDROID) && !this.cmp.pointerEventsDisabled) {
+                this.activatePointerEvents().pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeUntil"])(this.destroyed)).subscribe();
+            }
+            // Stream that emits when host component is updated
+            const updated = this.cmp.updated.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(() => this.onUpdated()));
+            // Update scrollbar thumb when viewport is scrolled and when scrollbar component is updated
+            Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["merge"])(this.cmp.scrolled, updated).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(() => this.thumb.update()), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeUntil"])(this.destroyed)).subscribe();
+            // Initialize scrollbar
+            rxjs__WEBPACK_IMPORTED_MODULE_7__["asyncScheduler"].schedule(() => this.thumb.update(), 100);
+        });
+    }
+    ngOnDestroy() {
+        this.destroyed.next();
+        this.destroyed.complete();
+        // Clean up viewport streams if used
+        if (this.viewportThumbClicked && this.viewportTrackClicked) {
+            this.viewportTrackClicked.complete();
+            this.viewportThumbClicked.complete();
+        }
+    }
+}
+Scrollbar.ɵfac = function Scrollbar_Factory(t) { return new (t || Scrollbar)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NgScrollbar), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](undefined), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"])); };
+Scrollbar.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: Scrollbar });
+Scrollbar.ctorParameters = () => [
+    { type: NgScrollbar },
+    { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] },
+    { type: undefined },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] }
+];
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](Scrollbar, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"]
+    }], function () { return [{ type: NgScrollbar }, { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] }, { type: undefined }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] }]; }, null); })();
+
+class ScrollbarY extends Scrollbar {
+    constructor(cmp, platform, document, zone) {
+        super(cmp, platform, document, zone);
+        this.cmp = cmp;
+        this.platform = platform;
+        this.document = document;
+        this.zone = zone;
+    }
+    get viewportScrollSize() {
+        return this.cmp.viewport.scrollHeight;
+    }
+    setHovered(value) {
+        this.cmp.setHovered({ verticalHovered: value });
+    }
+    onUpdated() {
+    }
+}
+ScrollbarY.ɵfac = function ScrollbarY_Factory(t) { return new (t || ScrollbarY)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NgScrollbar), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"])); };
+ScrollbarY.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineComponent"]({ type: ScrollbarY, selectors: [["scrollbar-y"]], viewQuery: function ScrollbarY_Query(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵstaticViewQuery"](TrackYDirective, true);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵstaticViewQuery"](ThumbYDirective, true);
+    } if (rf & 2) {
+        var _t;
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵqueryRefresh"](_t = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵloadQuery"]()) && (ctx.track = _t.first);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵqueryRefresh"](_t = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵloadQuery"]()) && (ctx.thumb = _t.first);
+    } }, hostVars: 2, hostBindings: function ScrollbarY_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵclassProp"]("scrollbar-control", true);
+    } }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]], decls: 2, vars: 7, consts: [["scrollbarTrackY", ""], ["scrollbarThumbY", "", 3, "track"]], template: function ScrollbarY_Template(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](0, "div", 0);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](1, "div", 1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+    } if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵclassMapInterpolate1"]("ng-scrollbar-track ", ctx.cmp.trackClass, "");
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵclassMapInterpolate1"]("ng-scrollbar-thumb ", ctx.cmp.thumbClass, "");
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("track", ctx.track);
+    } }, directives: [TrackYDirective, ThumbYDirective], styles: [".ng-scrollbar-wrapper>scrollbar-y.scrollbar-control{width:var(--vertical-scrollbar-total-size)}  .ng-scrollbar-wrapper>scrollbar-y.scrollbar-control>.ng-scrollbar-track{height:calc(100% - var(--scrollbar-padding)*2);width:var(--vertical-scrollbar-size)}  .ng-scrollbar-wrapper>scrollbar-y.scrollbar-control>.ng-scrollbar-track>.ng-scrollbar-thumb{height:0;width:100%}  .ng-scrollbar-wrapper[verticalDragging=true]>scrollbar-y.scrollbar-control .ng-scrollbar-thumb,   .ng-scrollbar-wrapper[verticalHovered=true]>scrollbar-y.scrollbar-control .ng-scrollbar-thumb{background-color:var(--scrollbar-thumb-hover-color)}  .ng-scrollbar-wrapper[deactivated=false]>scrollbar-y.scrollbar-control{bottom:0;top:0}  .ng-scrollbar-wrapper[deactivated=false][dir=ltr]>scrollbar-y.scrollbar-control{left:unset;right:0}  .ng-scrollbar-wrapper[deactivated=false][dir=ltr][position=invertAll]>scrollbar-y.scrollbar-control,   .ng-scrollbar-wrapper[deactivated=false][dir=ltr][position=invertY]>scrollbar-y.scrollbar-control,   .ng-scrollbar-wrapper[deactivated=false][dir=rtl]>scrollbar-y.scrollbar-control{left:0;right:unset}  .ng-scrollbar-wrapper[deactivated=false][dir=rtl][position=invertAll]>scrollbar-y.scrollbar-control,   .ng-scrollbar-wrapper[deactivated=false][dir=rtl][position=invertY]>scrollbar-y.scrollbar-control{left:unset;right:0}  .ng-scrollbar-wrapper[deactivated=false][track=all]>scrollbar-y.scrollbar-control[fit=true]{bottom:var(--scrollbar-total-size);top:0}  .ng-scrollbar-wrapper[deactivated=false][track=all][position=invertAll]>scrollbar-y.scrollbar-control[fit=true],   .ng-scrollbar-wrapper[deactivated=false][track=all][position=invertX]>scrollbar-y.scrollbar-control[fit=true]{bottom:0;top:var(--scrollbar-total-size)}"], changeDetection: 0 });
+ScrollbarY.ctorParameters = () => [
+    { type: NgScrollbar },
+    { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] },
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"],] }] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] }
+];
+ScrollbarY.propDecorators = {
+    track: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"], args: [TrackYDirective, { static: true },] }],
+    thumb: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"], args: [ThumbYDirective, { static: true },] }]
+};
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ScrollbarY, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"],
+        args: [{
+                selector: 'scrollbar-y',
+                host: { '[class.scrollbar-control]': 'true' },
+                changeDetection: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ChangeDetectionStrategy"].OnPush,
+                template: `
+    <div scrollbarTrackY class="ng-scrollbar-track {{cmp.trackClass}}">
+      <div scrollbarThumbY [track]="track" class="ng-scrollbar-thumb {{cmp.thumbClass}}"></div>
+    </div>
+  `,
+                styles: ["::ng-deep .ng-scrollbar-wrapper>scrollbar-y.scrollbar-control{width:var(--vertical-scrollbar-total-size)}::ng-deep .ng-scrollbar-wrapper>scrollbar-y.scrollbar-control>.ng-scrollbar-track{height:calc(100% - var(--scrollbar-padding)*2);width:var(--vertical-scrollbar-size)}::ng-deep .ng-scrollbar-wrapper>scrollbar-y.scrollbar-control>.ng-scrollbar-track>.ng-scrollbar-thumb{height:0;width:100%}::ng-deep .ng-scrollbar-wrapper[verticalDragging=true]>scrollbar-y.scrollbar-control .ng-scrollbar-thumb,::ng-deep .ng-scrollbar-wrapper[verticalHovered=true]>scrollbar-y.scrollbar-control .ng-scrollbar-thumb{background-color:var(--scrollbar-thumb-hover-color)}::ng-deep .ng-scrollbar-wrapper[deactivated=false]>scrollbar-y.scrollbar-control{bottom:0;top:0}::ng-deep .ng-scrollbar-wrapper[deactivated=false][dir=ltr]>scrollbar-y.scrollbar-control{left:unset;right:0}::ng-deep .ng-scrollbar-wrapper[deactivated=false][dir=ltr][position=invertAll]>scrollbar-y.scrollbar-control,::ng-deep .ng-scrollbar-wrapper[deactivated=false][dir=ltr][position=invertY]>scrollbar-y.scrollbar-control,::ng-deep .ng-scrollbar-wrapper[deactivated=false][dir=rtl]>scrollbar-y.scrollbar-control{left:0;right:unset}::ng-deep .ng-scrollbar-wrapper[deactivated=false][dir=rtl][position=invertAll]>scrollbar-y.scrollbar-control,::ng-deep .ng-scrollbar-wrapper[deactivated=false][dir=rtl][position=invertY]>scrollbar-y.scrollbar-control{left:unset;right:0}::ng-deep .ng-scrollbar-wrapper[deactivated=false][track=all]>scrollbar-y.scrollbar-control[fit=true]{bottom:var(--scrollbar-total-size);top:0}::ng-deep .ng-scrollbar-wrapper[deactivated=false][track=all][position=invertAll]>scrollbar-y.scrollbar-control[fit=true],::ng-deep .ng-scrollbar-wrapper[deactivated=false][track=all][position=invertX]>scrollbar-y.scrollbar-control[fit=true]{bottom:0;top:var(--scrollbar-total-size)}"]
+            }]
+    }], function () { return [{ type: NgScrollbar }, { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] }, { type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]]
+            }] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] }]; }, { track: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"],
+            args: [TrackYDirective, { static: true }]
+        }], thumb: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"],
+            args: [ThumbYDirective, { static: true }]
+        }] }); })();
+class ScrollbarX extends Scrollbar {
+    constructor(el, cmp, platform, document, zone) {
+        super(cmp, platform, document, zone);
+        this.el = el;
+        this.cmp = cmp;
+        this.platform = platform;
+        this.document = document;
+        this.zone = zone;
+    }
+    get viewportScrollSize() {
+        return this.cmp.viewport.scrollWidth;
+    }
+    get thickness() {
+        return this.el.nativeElement.clientHeight;
+    }
+    setHovered(value) {
+        this.cmp.setHovered({ horizontalHovered: value });
+    }
+    onUpdated() {
+        // Auto-height: Set root component height to content height
+        this.cmp.nativeElement.style.height = this.cmp.appearance === 'standard'
+            ? `${this.cmp.viewport.contentHeight + this.thickness}px`
+            : `${this.cmp.viewport.contentHeight}px`;
+    }
+}
+ScrollbarX.ɵfac = function ScrollbarX_Factory(t) { return new (t || ScrollbarX)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NgScrollbar), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"])); };
+ScrollbarX.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineComponent"]({ type: ScrollbarX, selectors: [["scrollbar-x"]], viewQuery: function ScrollbarX_Query(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵstaticViewQuery"](TrackXDirective, true);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵstaticViewQuery"](ThumbXDirective, true);
+    } if (rf & 2) {
+        var _t;
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵqueryRefresh"](_t = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵloadQuery"]()) && (ctx.track = _t.first);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵqueryRefresh"](_t = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵloadQuery"]()) && (ctx.thumb = _t.first);
+    } }, hostVars: 2, hostBindings: function ScrollbarX_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵclassProp"]("scrollbar-control", true);
+    } }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]], decls: 2, vars: 7, consts: [["scrollbarTrackX", ""], ["scrollbarThumbX", "", 3, "track"]], template: function ScrollbarX_Template(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](0, "div", 0);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](1, "div", 1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+    } if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵclassMapInterpolate1"]("ng-scrollbar-track ", ctx.cmp.trackClass, "");
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵclassMapInterpolate1"]("ng-scrollbar-thumb ", ctx.cmp.thumbClass, "");
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("track", ctx.track);
+    } }, directives: [TrackXDirective, ThumbXDirective], styles: [".ng-scrollbar-wrapper>scrollbar-x.scrollbar-control{height:var(--horizontal-scrollbar-total-size)}  .ng-scrollbar-wrapper>scrollbar-x.scrollbar-control>.ng-scrollbar-track{height:var(--horizontal-scrollbar-size);width:calc(100% - var(--scrollbar-padding)*2)}  .ng-scrollbar-wrapper>scrollbar-x.scrollbar-control>.ng-scrollbar-track>.ng-scrollbar-thumb{height:100%;width:0}  .ng-scrollbar-wrapper[horizontalDragging=true]>scrollbar-x.scrollbar-control .ng-scrollbar-thumb,   .ng-scrollbar-wrapper[horizontalHovered=true]>scrollbar-x.scrollbar-control .ng-scrollbar-thumb{background-color:var(--scrollbar-thumb-hover-color)}  .ng-scrollbar-wrapper[position=invertAll]>scrollbar-x.scrollbar-control,   .ng-scrollbar-wrapper[position=invertX]>scrollbar-x.scrollbar-control{bottom:unset;top:0}  .ng-scrollbar-wrapper[deactivated=false]>scrollbar-x.scrollbar-control{bottom:0;left:0;right:0;top:unset}  .ng-scrollbar-wrapper[deactivated=false][position=invertAll]>scrollbar-x.scrollbar-control,   .ng-scrollbar-wrapper[deactivated=false][position=invertX]>scrollbar-x.scrollbar-control{bottom:unset;top:0}  .ng-scrollbar-wrapper[deactivated=false][track=all][dir=ltr]>scrollbar-x.scrollbar-control[fit=true]{left:0;right:var(--scrollbar-total-size)}  .ng-scrollbar-wrapper[deactivated=false][track=all][dir=ltr][position=invertAll]>scrollbar-x.scrollbar-control[fit=true],   .ng-scrollbar-wrapper[deactivated=false][track=all][dir=ltr][position=invertY]>scrollbar-x.scrollbar-control[fit=true],   .ng-scrollbar-wrapper[deactivated=false][track=all][dir=rtl]>scrollbar-x.scrollbar-control[fit=true]{left:var(--scrollbar-total-size);right:0}  .ng-scrollbar-wrapper[deactivated=false][track=all][dir=rtl][position=invertAll]>scrollbar-x.scrollbar-control[fit=true],   .ng-scrollbar-wrapper[deactivated=false][track=all][dir=rtl][position=invertY]>scrollbar-x.scrollbar-control[fit=true]{left:0;right:var(--scrollbar-total-size)}"], changeDetection: 0 });
+ScrollbarX.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: NgScrollbar },
+    { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] },
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"],] }] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] }
+];
+ScrollbarX.propDecorators = {
+    track: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"], args: [TrackXDirective, { static: true },] }],
+    thumb: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"], args: [ThumbXDirective, { static: true },] }]
+};
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ScrollbarX, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"],
+        args: [{
+                selector: 'scrollbar-x',
+                host: { '[class.scrollbar-control]': 'true' },
+                changeDetection: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ChangeDetectionStrategy"].OnPush,
+                template: `
+    <div scrollbarTrackX class="ng-scrollbar-track {{cmp.trackClass}}">
+      <div scrollbarThumbX [track]="track" class="ng-scrollbar-thumb {{cmp.thumbClass}}"></div>
+    </div>
+  `,
+                styles: ["::ng-deep .ng-scrollbar-wrapper>scrollbar-x.scrollbar-control{height:var(--horizontal-scrollbar-total-size)}::ng-deep .ng-scrollbar-wrapper>scrollbar-x.scrollbar-control>.ng-scrollbar-track{height:var(--horizontal-scrollbar-size);width:calc(100% - var(--scrollbar-padding)*2)}::ng-deep .ng-scrollbar-wrapper>scrollbar-x.scrollbar-control>.ng-scrollbar-track>.ng-scrollbar-thumb{height:100%;width:0}::ng-deep .ng-scrollbar-wrapper[horizontalDragging=true]>scrollbar-x.scrollbar-control .ng-scrollbar-thumb,::ng-deep .ng-scrollbar-wrapper[horizontalHovered=true]>scrollbar-x.scrollbar-control .ng-scrollbar-thumb{background-color:var(--scrollbar-thumb-hover-color)}::ng-deep .ng-scrollbar-wrapper[position=invertAll]>scrollbar-x.scrollbar-control,::ng-deep .ng-scrollbar-wrapper[position=invertX]>scrollbar-x.scrollbar-control{bottom:unset;top:0}::ng-deep .ng-scrollbar-wrapper[deactivated=false]>scrollbar-x.scrollbar-control{bottom:0;left:0;right:0;top:unset}::ng-deep .ng-scrollbar-wrapper[deactivated=false][position=invertAll]>scrollbar-x.scrollbar-control,::ng-deep .ng-scrollbar-wrapper[deactivated=false][position=invertX]>scrollbar-x.scrollbar-control{bottom:unset;top:0}::ng-deep .ng-scrollbar-wrapper[deactivated=false][track=all][dir=ltr]>scrollbar-x.scrollbar-control[fit=true]{left:0;right:var(--scrollbar-total-size)}::ng-deep .ng-scrollbar-wrapper[deactivated=false][track=all][dir=ltr][position=invertAll]>scrollbar-x.scrollbar-control[fit=true],::ng-deep .ng-scrollbar-wrapper[deactivated=false][track=all][dir=ltr][position=invertY]>scrollbar-x.scrollbar-control[fit=true],::ng-deep .ng-scrollbar-wrapper[deactivated=false][track=all][dir=rtl]>scrollbar-x.scrollbar-control[fit=true]{left:var(--scrollbar-total-size);right:0}::ng-deep .ng-scrollbar-wrapper[deactivated=false][track=all][dir=rtl][position=invertAll]>scrollbar-x.scrollbar-control[fit=true],::ng-deep .ng-scrollbar-wrapper[deactivated=false][track=all][dir=rtl][position=invertY]>scrollbar-x.scrollbar-control[fit=true]{left:0;right:var(--scrollbar-total-size)}"]
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: NgScrollbar }, { type: _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["Platform"] }, { type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["DOCUMENT"]]
+            }] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] }]; }, { track: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"],
+            args: [TrackXDirective, { static: true }]
+        }], thumb: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"],
+            args: [ThumbXDirective, { static: true }]
+        }] }); })();
+
+class NgScrollbarModule {
+    static withConfig(options) {
+        return {
+            ngModule: NgScrollbarModule,
+            providers: [
+                { provide: NG_SCROLLBAR_OPTIONS, useValue: options }
+            ]
+        };
+    }
+}
+NgScrollbarModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: NgScrollbarModule });
+NgScrollbarModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ factory: function NgScrollbarModule_Factory(t) { return new (t || NgScrollbarModule)(); }, imports: [[
+            _angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"],
+            _angular_cdk_bidi__WEBPACK_IMPORTED_MODULE_2__["BidiModule"],
+            _angular_cdk_portal__WEBPACK_IMPORTED_MODULE_3__["PortalModule"],
+            _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["PlatformModule"],
+            ngx_scrollbar_smooth_scroll__WEBPACK_IMPORTED_MODULE_5__["SmoothScrollModule"]
+        ]] });
+(function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](NgScrollbarModule, { declarations: function () { return [NgScrollbar, ScrollViewport, HideNativeScrollbar, NgAttr, ResizeSensor, ThumbYDirective, ThumbXDirective, TrackXDirective, TrackYDirective, ScrollbarY, ScrollbarX]; }, imports: function () { return [_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"],
+        _angular_cdk_bidi__WEBPACK_IMPORTED_MODULE_2__["BidiModule"],
+        _angular_cdk_portal__WEBPACK_IMPORTED_MODULE_3__["PortalModule"],
+        _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["PlatformModule"],
+        ngx_scrollbar_smooth_scroll__WEBPACK_IMPORTED_MODULE_5__["SmoothScrollModule"]]; }, exports: function () { return [NgScrollbar, ScrollViewport]; } }); })();
+/*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](NgScrollbarModule, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
+        args: [{
+                imports: [
+                    _angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"],
+                    _angular_cdk_bidi__WEBPACK_IMPORTED_MODULE_2__["BidiModule"],
+                    _angular_cdk_portal__WEBPACK_IMPORTED_MODULE_3__["PortalModule"],
+                    _angular_cdk_platform__WEBPACK_IMPORTED_MODULE_4__["PlatformModule"],
+                    ngx_scrollbar_smooth_scroll__WEBPACK_IMPORTED_MODULE_5__["SmoothScrollModule"]
+                ],
+                declarations: [
+                    NgScrollbar,
+                    ScrollViewport,
+                    HideNativeScrollbar,
+                    NgAttr,
+                    ResizeSensor,
+                    ThumbYDirective,
+                    ThumbXDirective,
+                    TrackXDirective,
+                    TrackYDirective,
+                    ScrollbarY,
+                    ScrollbarX
+                ],
+                exports: [
+                    NgScrollbar,
+                    ScrollViewport
+                ]
+            }]
+    }], null, null); })();
+
+/*
+ * Public API Surface of ngx-scrollbar
+ */
+
+/**
+ * Generated bundle index. Do not edit.
+ */
+
+
+
+//# sourceMappingURL=ngx-scrollbar.js.map
 
 /***/ }),
 
