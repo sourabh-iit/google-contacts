@@ -7,7 +7,7 @@ const {google} = require('googleapis');
 const CLIENT_ID = "737715185635-6r9bbcbsa2d1hm4ok049iugrqjop6odb.apps.googleusercontent.com";
 const CLIENT_SECRET = "YaKv-28UErCFuEquC3-lXS1m";
 const redirectUri = "http://localhost:3000/google/callback";
-const url = process.env.MONGODB_URI || "mongodb://localhost:27017";
+const url = process.env.MONGODB_URI || "mongodb://mongo:27017";
 
 async function connect() {
   const client = await mongoclient.connect(url);

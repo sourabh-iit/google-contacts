@@ -16,8 +16,11 @@
       <div class="col">EMAIL</div>
       <div class="col">PHONE NUMBER</div>
     </div>
+    <div *ngIf="busy" class="d-flex justify-content-center mt-3">
+      <small><i class="fa fa-spin fa-spinner"></i> Loading. Please wait...</small>
+    </div>
     <ng-scrollbar class="my-scrollbar">
-      <div class="contacts-container">
+      <div class="contacts-container" style="height: {{contactsContainerHeight}}px;">
         <div class="row table-row" *ngFor="let contact of contacts">
           <div class="col">
             <img class="cover-photo" [src]="contact.coverPhoto" alt="contact.name" *ngIf="contact.coverPhoto != ''">
@@ -36,8 +39,5 @@
         </div>
       </div>
     </ng-scrollbar>
-    <div *ngIf="busy" class="d-flex justify-content-center mt-3">
-      <small><i class="fa fa-spin fa-spinner"></i> Loading. Please wait...</small>
-    </div>
   </div>
 </div>

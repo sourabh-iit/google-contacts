@@ -4,7 +4,7 @@ const assert = require('assert');
 const {OAuth2Client} = require('google-auth-library');
 
 const CLIENT_ID = "737715185635-6r9bbcbsa2d1hm4ok049iugrqjop6odb.apps.googleusercontent.com";
-const url = process.env.MONGODB_URI || "mongodb://localhost:27017";
+const url = process.env.MONGODB_URI || "mongodb://mongo:27017";
 
 async function connect() {
   const client = await mongoclient.connect(url);

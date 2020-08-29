@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { GoogleService } from 'src/app/services/googleService';
 import { NgScrollbar } from 'ngx-scrollbar';
+import * as $ from 'jquery';
 
 @Component({
   selector: 'app-contacts',
@@ -18,6 +19,7 @@ export class ContactsComponent implements OnDestroy, AfterViewInit {
   public totalContacts = 0;
   public nextPageToken = null;
   public busy = false;
+  public contactsContainerHeight = 400;
   @ViewChild(NgScrollbar) scrollbarRef: NgScrollbar;
 
   constructor(
@@ -42,10 +44,17 @@ export class ContactsComponent implements OnDestroy, AfterViewInit {
         this.loadContacts(this.nextPageToken);
       }
     }));
+    setTimeout(() => {
+      this.contactsContainerHeight = this.calContactsContainerHeight();
+    }, 0);
   }
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
+  }
+
+  calContactsContainerHeight(): number {
+    return $(window).innerHeight() - $('.contacts-container').offset().top - 10;
   }
 
   logoutUser = () => {
@@ -69,7 +78,7 @@ export class ContactsComponent implements OnDestroy, AfterViewInit {
       this.contacts = this.contacts.concat(res.contacts);
       this.totalContacts = res.totalItems;
       this.nextPageToken = res.nextPageToken;
-      this.busy = false
+      this.busy = false;
     });
   }
 }
