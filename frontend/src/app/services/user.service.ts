@@ -20,11 +20,10 @@ export class UserService {
     return this.http.post(endpoint, user);
   }
 
-  login(token: string): Observable<any> {
+  login(data: any): Observable<any> {
     const endpoint = `${this.api}/login`;
-    return this.http.post(endpoint, {
-      idToken: token
-    }).pipe(tap((res: any) => localStorage.setItem('user', JSON.stringify({
+    return this.http.post(endpoint, data)
+    .pipe(tap((res: any) => localStorage.setItem('user', JSON.stringify({
       user: res.user,
       token: res.token
     }))));
@@ -40,6 +39,11 @@ export class UserService {
     } catch (e) {
       return false;
     }
+  }
+
+  getAuthUrl(): Observable<any> {
+    const endpoint = `${this.api}/authurl`;
+    return this.http.get(endpoint);
   }
 
   logout(): void {

@@ -11,6 +11,7 @@ import { UserService } from './services/user.service';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { AuthGuardService } from './services/auth-guard.service';
 import { ContactsComponent } from './components/contacts/contacts.component';
+import { GoogleService } from './services/googleService';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { ContactsComponent } from './components/contacts/contacts.component';
       useClass: AuthInterceptor,
       multi: true
     },
-    AuthGuardService
+    AuthGuardService,
+    GoogleService
   ],
   bootstrap: [AppComponent]
 })

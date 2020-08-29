@@ -15,9 +15,9 @@ body {
   height: 100%;
   background: #EFF7F9;
   background-image: url('./assets/Background.png');
-  background-position: center;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: contain;
+  letter-spacing: 0.08em;
 }
 
 .c-pointer {

@@ -1,6 +1,7 @@
 const express = require('express');
 const auth_util = require('./auth_util');
 const auth = require('./routes/auth');
+const googleRouter = require('./routes/google')
 const http = require('http');
 const path = require('path');
 
@@ -17,6 +18,8 @@ app.get('/login', function(req, res) {
   res.sendFile(temp_path);
 });
 app.use('/api/v1/login', auth.login);
+// app.get('/api/v1/authurl', auth.getAuthUrl);
+// app.get('/google/callback', auth.googleCallback);
 app.get('/', function(req, res, next) {
   res.sendFile(temp_path);
 });
@@ -35,7 +38,7 @@ app.use(async function(req, res, next) {
   }
 });
 
-// app.use('/api/v1', usersRouter);
+app.use('/api/v1/google', googleRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, NgZone } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { GoogleService } from 'src/app/services/googleService';
 
 declare const gapi: any;
 
@@ -10,19 +11,20 @@ declare const gapi: any;
   templateUrl: './contacts.component.html',
   styleUrls: ['./contacts.component.scss']
 })
-export class ContactsComponent implements OnInit, OnDestroy {
+export class ContactsComponent implements OnDestroy {
 
   public me: any;
   private subs = new Subscription();
+  public contacts = [];
 
   constructor(
-    private userService: UserService,
-    private router: Router
+    public userService: UserService,
+    private router: Router,
+    private zone: NgZone,
+    private googleService: GoogleService
   ) {
     this.me = this.userService.user;
-  }
-
-  ngOnInit(): void {
+    this.loadContacts();
   }
 
   ngOnDestroy(): void {
@@ -31,7 +33,7 @@ export class ContactsComponent implements OnInit, OnDestroy {
 
   logoutUser = () => {
     this.userService.logout();
-    this.router.navigateByUrl('/login');
+    this.zone.run(() => this.router.navigateByUrl('/login'));
   }
 
   logout(): void {
@@ -42,6 +44,13 @@ export class ContactsComponent implements OnInit, OnDestroy {
       } else {
         this.logoutUser();
       }
+    });
+  }
+
+  loadContacts(): void {
+    this.googleService.loadContacts().subscribe((res) => {
+      this.contacts = res.contacts;
+      console.log(this.contacts);
     });
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, NgZone } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 
@@ -16,7 +16,8 @@ export class LoginComponent implements AfterViewInit {
 
   constructor(
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private zone: NgZone
   ) {
     if (userService.isLoggedIn()) {
       router.navigateByUrl('/');
@@ -27,11 +28,10 @@ export class LoginComponent implements AfterViewInit {
     this.googleInit();
   }
 
-  login(token): void {
+  login(data): void {
     this.busy = true;
-    this.userService.login(token).subscribe((res: any) => {
-      console.log(res);
-      this.router.navigate(['/']);
+    this.userService.login(data).subscribe((res: any) => {
+      this.zone.run(() => this.router.navigate(['/']));
     }, () => {
       this.busy = false;
     });
@@ -41,19 +41,23 @@ export class LoginComponent implements AfterViewInit {
     gapi.load('auth2', () => {
       this.auth2 = gapi.auth2.init({
         client_id: '737715185635-6r9bbcbsa2d1hm4ok049iugrqjop6odb.apps.googleusercontent.com',
-        scope: 'profile email'
+        scope: 'profile email https://www.googleapis.com/auth/contacts.readonly',
+        redirect_uri: 'http://localhost:3000/google/callback'
       });
-      this.attachSignin(document.getElementById('googleBtn'));
+      this.attachSignIn(document.getElementById('googleBtn'));
     });
   }
 
-  public attachSignin(element): void {
+  public attachSignIn(element): void {
     this.auth2.attachClickHandler(element, {},
       (googleUser) => {
-        this.login(googleUser.getAuthResponse().id_token);
+        const data = googleUser.getAuthResponse();
+        this.login({
+          idToken: data.id_token,
+          accessToken: data.access_token
+        });
       }, (error) => {
-        alert(JSON.stringify(error, undefined, 2));
-      });
+    });
   }
 
 }

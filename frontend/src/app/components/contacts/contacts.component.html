@@ -1,6 +1,6 @@
-<div class="header">
+<div class="header" *ngIf="userService.user">
   <div class="d-flex align-items-center">
-    <img class="dp" [src]="me.googlePictureLink" [alt]="me.email">
+    <img class="dp" [src]="userService.user.googlePictureLink" [alt]="userService.user.email">
     <div class="info">
       <div class="name">{{me.name}}</div>
       <div class="email">{{me.email}}</div>

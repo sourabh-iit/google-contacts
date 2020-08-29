@@ -22,5 +22,10 @@ function verifyAccesstoken(token) {
     }
 }
 
+function getAccessToken(refreshToken) {
+
+}
+
 module.exports.createToken = createToken;
 module.exports.verifyAccesstoken = verifyAccesstoken;
+module.exports.getAccessToken = getAccessToken;
