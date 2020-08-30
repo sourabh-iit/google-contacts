@@ -1,6 +1,6 @@
 let jwt = require('jsonwebtoken');
 
-const secret = "secret";
+const secret = process.env.JWT_SECRET || "secret";
 const validity = 60*60*24*30;
 
 const createToken = function(username) {
@@ -11,7 +11,6 @@ const createToken = function(username) {
     });
     return token;
 }
-
 
 function verifyAccesstoken(token) {
     try {
