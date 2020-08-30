@@ -2,7 +2,7 @@
 
 A simple website to show contacts from one's google account. Google's sign is used for authentication and access tokens to get user's contacts. And JWT is used for further authorization and authentication. It is a knolskape coding assignment.
 
-link: https://realtime-messaging-app.herokuapp.com
+link: https://googlecontacts.herokuapp.com/
 
 ## Tech stack used:
 Docker
